@@ -1,9 +1,8 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.ServiceBus.Messaging;
-using Microsoft.Azure;
+
 using NCS.DSS.ContentEnhancer.Service;
-using System;
 
 namespace NCS.DSS.ContentEnhancer
 {

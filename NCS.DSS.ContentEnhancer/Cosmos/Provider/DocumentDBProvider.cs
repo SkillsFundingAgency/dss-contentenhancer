@@ -2,13 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using NCS.DSS.ContentEnhancer.Cosmos.Client;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
-using NCS.DSS.ContentEnhancer.Cosmos.Provider;
-using NCS.DSS.ContentEnhancer.Models;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 {
@@ -29,23 +25,23 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 
             var client = _databaseClient.CreateDocumentClient();
 
-            var Query = client
+            var query = client
                 ?.CreateDocumentQuery<Models.Subscriptions>(collectionUri)
                 .Where(x => x.CustomerId == customerId)
                 .AsDocumentQuery();
 
-            if (Query == null)
+            if (query == null)
                 return null;
 
-            var Subscriptions = new List<Models.Subscriptions>();
+            var subscriptions = new List<Models.Subscriptions>();
 
-            while (Query.HasMoreResults)
+            while (query.HasMoreResults)
             {
-                var Results = await Query.ExecuteNextAsync<Models.Subscriptions>();
-                Subscriptions.AddRange(Results);
+                var results = await query.ExecuteNextAsync<Models.Subscriptions>();
+                subscriptions.AddRange(results);
             }
 
-            return Subscriptions.Any() ? Subscriptions : null;
+            return subscriptions.Any() ? subscriptions : null;
         }
 
     }
