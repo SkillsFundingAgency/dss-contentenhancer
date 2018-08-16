@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.ServiceBus.Messaging;
 using NCS.DSS.ContentEnhancer.Cosmos.Provider;
@@ -18,7 +19,15 @@ namespace NCS.DSS.ContentEnhancer.Service
         {
             try
             {
-                var subscriptions = await GetSubscriptionsAsync(queueItem);
+                var messageModel = JsonConvert.DeserializeObject<MessageModel>(queueItem);
+
+                if(messageModel == null)
+                    return;
+
+                if (IsANewCustomer(messageModel))
+                    await CreateSubscriptionAsync(messageModel);
+
+                var subscriptions = await GetSubscriptionsAsync(messageModel);
 
                 if (subscriptions != null)
                 {
@@ -44,7 +53,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             }
         }
 
-        public string GetTopic(string touchPointId)
+        private static string GetTopic(string touchPointId)
         {
             switch (touchPointId)
             {
@@ -73,10 +82,40 @@ namespace NCS.DSS.ContentEnhancer.Service
             }
         }
 
-        public async Task<List<Subscriptions>> GetSubscriptionsAsync(string queueItem)
+        public bool IsANewCustomer(MessageModel messageModel)
         {
-            var customer = JsonConvert.DeserializeObject<MessageModel>(queueItem);
-            var customerGuid = customer.CustomerGuid;
+            return messageModel != null && messageModel.IsNewCustomer;
+        }
+
+        public async Task<Subscriptions> CreateSubscriptionAsync(MessageModel messageModel)
+        {
+            if (messageModel == null)
+                return null;
+
+            var subcription = new Subscriptions
+            {
+                SubscriptionId = Guid.NewGuid(),
+                CustomerId = messageModel.CustomerGuid.GetValueOrDefault(),
+                Subscribe = true,
+                LastModifiedDate = messageModel.LastModifiedDate
+            };
+
+            if (!messageModel.LastModifiedDate.HasValue)
+                subcription.LastModifiedDate = DateTime.Now;
+
+            var documentDbProvider = new DocumentDBProvider();
+
+            var response = await documentDbProvider.CreateSubscriptionsAsync(subcription);
+
+            return response.StatusCode == HttpStatusCode.Created ? (dynamic)response.Resource : (Guid?)null;
+        }
+
+        public async Task<List<Subscriptions>> GetSubscriptionsAsync(MessageModel messageModel)
+        {
+            if (messageModel == null)
+                return null;
+
+            var customerGuid = messageModel.CustomerGuid;
 
             var documentDbProvider = new DocumentDBProvider();
             var subscriptions = await documentDbProvider.GetSubscriptionsByCustomerIdAsync(customerGuid);

@@ -6,7 +6,8 @@ namespace NCS.DSS.ContentEnhancer.Models
     {
         public string TitleMessage { get; set; }
         public Guid? CustomerGuid { get; set; }
-        public DateTime? LastmodifiedDate { get; set; }
+        public DateTime? LastModifiedDate { get; set; }
         public string URL { get; set; }
+        public bool IsNewCustomer { get; set; }
     }
 }

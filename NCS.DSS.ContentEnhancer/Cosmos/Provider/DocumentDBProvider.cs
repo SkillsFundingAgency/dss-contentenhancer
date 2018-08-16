@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using NCS.DSS.ContentEnhancer.Cosmos.Client;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
@@ -27,7 +29,8 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 
             var query = client
                 ?.CreateDocumentQuery<Models.Subscriptions>(collectionUri)
-                .Where(x => x.CustomerId == customerId)
+                .Where(x => x.CustomerId == customerId &&
+                            x.Subscribe)
                 .AsDocumentQuery();
 
             if (query == null)
@@ -42,6 +45,21 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
             }
 
             return subscriptions.Any() ? subscriptions : null;
+        }
+
+        public async Task<ResourceResponse<Document>> CreateSubscriptionsAsync(Models.Subscriptions subscriptions)
+        {
+            var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
+
+            var client = _databaseClient.CreateDocumentClient();
+
+            if (client == null)
+                return null;
+
+            var response = await client.CreateDocumentAsync(collectionUri, subscriptions);
+
+            return response;
+
         }
 
     }
