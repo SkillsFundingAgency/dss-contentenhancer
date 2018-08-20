@@ -2,12 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
   "parameters": {
-    "azureWebJobsStorageUseDevelopmentStorage": {
-      "type": "bool"
-    },
-    "azureWebJobsDashboardUseDevelopmentStorage": {
-      "type": "bool"
-    },
     "cosmosDbCollectionId": {
       "type": "string"
     },
@@ -57,12 +51,6 @@
               "parameters": {
                 "functionAppName": {
                   "value": "[parameters('functionAppNames')[copyIndex()]]"
-                },
-                "azureWebJobsStorageUseDevelopmentStorage": {
-                  "value": "[parameters('azureWebJobsStorageUseDevelopmentStorage')]"
-                },
-                "azureWebJobsDashboardUseDevelopmentStorage": {
-                  "value": "parameters('azureWebJobsDashboardUseDevelopmentStorage')]"
                 },
                 "appServicePlanId": {
                   "value": "[variables('sharedAppServicePlanId')]"

@@ -8,12 +8,6 @@
     "appServicePlanId": {
       "type": "string"
     },
-    "azureWebJobsStorageUseDevelopmentStorage": {
-      "type": "bool"
-    },
-    "azureWebJobsDashboardUseDevelopmentStorage": {
-      "type": "bool"
-    },
     "configEnvironmentName": {
       "type": "string"
     },
@@ -76,14 +70,6 @@
             {
               "name": "Key",
               "value": "[parameters('cosmosDbKey')]"
-            },
-            {
-              "name": "AzureWebJobsStorage",
-              "value": "[concat('UseDevelopmentStorage=', parameters('azureWebJobsStorageUseDevelopmentStorage'))]"
-            },
-            {
-              "name": "AzureWebJobsDashboard",
-              "value": "[concat('UseDevelopmentStorage=', parameters('azureWebJobsDashboardUseDevelopmentStorage'))]"
             },
             {
               "name": "ServiceBusConnectionString",
