@@ -10,7 +10,7 @@ namespace NCS.DSS.ContentEnhancer
     {
         [FunctionName("QueueProcessor")]
         public static async System.Threading.Tasks.Task RunAsync(
-            [ServiceBusTrigger("dss.contentqueue", AccessRights.Manage, Connection = "ServiceBusConnectionString")]string queueItem, 
+            [ServiceBusTrigger("dss.contentqueue", AccessRights.Manage, Connection = "ServiceBusConnectionString")]BrokeredMessage queueItem, 
             TraceWriter log)
         {
             QueueProcessorService service = new QueueProcessorService();

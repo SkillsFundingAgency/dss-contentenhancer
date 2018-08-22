@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
+using System.IO;
 using System.Net;
+using System.Runtime.Serialization;
+using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.ServiceBus.Messaging;
 using NCS.DSS.ContentEnhancer.Cosmos.Provider;
 using NCS.DSS.ContentEnhancer.Models;
@@ -15,13 +18,15 @@ namespace NCS.DSS.ContentEnhancer.Service
     {
         readonly string _connectionString = ConfigurationManager.AppSettings["ServiceBusConnectionString"];
 
-        public async Task SendToTopicAsync(string queueItem)
+        public async Task SendToTopicAsync(BrokeredMessage queueItem)
         {
             try
             {
-                var messageModel = JsonConvert.DeserializeObject<MessageModel>(queueItem);
+                var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
 
-                if(messageModel == null)
+                var messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
+
+                if (messageModel == null)
                     return;
 
                 if (IsANewCustomer(messageModel))
