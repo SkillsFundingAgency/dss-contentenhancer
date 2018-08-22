@@ -22,6 +22,7 @@ namespace NCS.DSS.ContentEnhancer.Service
         {
             try
             {
+
                 var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
 
                 var messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
@@ -46,7 +47,7 @@ namespace NCS.DSS.ContentEnhancer.Service
                                 continue;
 
                             var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
-                            var message = new BrokeredMessage(queueItem) {ContentType = "application/json"};
+                            var message = new BrokeredMessage(queueItem.Clone());
                             await client.SendAsync(message);
                         }
                     }
