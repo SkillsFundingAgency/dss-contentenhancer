@@ -96,8 +96,10 @@ namespace NCS.DSS.ContentEnhancer.Service
             {
                 SubscriptionId = Guid.NewGuid(),
                 CustomerId = messageModel.CustomerGuid.GetValueOrDefault(),
+                TouchPointId = messageModel.TouchpointId,
                 Subscribe = true,
-                LastModifiedDate = messageModel.LastModifiedDate
+                LastModifiedDate = messageModel.LastModifiedDate,
+                
             };
 
             if (!messageModel.LastModifiedDate.HasValue)

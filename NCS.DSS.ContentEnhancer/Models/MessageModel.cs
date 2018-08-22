@@ -9,5 +9,6 @@ namespace NCS.DSS.ContentEnhancer.Models
         public DateTime? LastModifiedDate { get; set; }
         public string URL { get; set; }
         public bool IsNewCustomer { get; set; }
+        public string TouchpointId { get; set; }
     }
 }
