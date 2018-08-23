@@ -40,6 +40,8 @@ namespace NCS.DSS.ContentEnhancer.Service
                 if (IsANewCustomer(messageModel) && !doesSubscriptionExist)
                 {
                     await CreateSubscriptionAsync(messageModel);
+                    queueItem.Complete();
+                    return;
                 }
 
                 if (subscriptions != null)
