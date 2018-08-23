@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
@@ -30,10 +31,13 @@ namespace NCS.DSS.ContentEnhancer.Service
                 if (messageModel == null)
                     return;
 
-                if (IsANewCustomer(messageModel))
-                    await CreateSubscriptionAsync(messageModel);
-
                 var subscriptions = await GetSubscriptionsAsync(messageModel);
+
+                if (IsANewCustomer(messageModel) && !subscriptions.Any(x => x.CustomerId == messageModel.CustomerGuid &&
+                                                                           x.TouchPointId == messageModel.TouchpointId))
+                {
+                    await CreateSubscriptionAsync(messageModel);
+                }
 
                 if (subscriptions != null)
                 {
@@ -41,6 +45,9 @@ namespace NCS.DSS.ContentEnhancer.Service
                     {
                         foreach (var subscription in subscriptions)
                         {
+                            if (messageModel.TouchpointId == subscription.TouchPointId)
+                                continue;
+
                             var topic = GetTopic(subscription.TouchPointId);
 
                             if (string.IsNullOrWhiteSpace(topic))
