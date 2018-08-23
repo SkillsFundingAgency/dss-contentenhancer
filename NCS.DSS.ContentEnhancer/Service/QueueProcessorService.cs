@@ -33,8 +33,11 @@ namespace NCS.DSS.ContentEnhancer.Service
 
                 var subscriptions = await GetSubscriptionsAsync(messageModel);
 
-                if (IsANewCustomer(messageModel) && !subscriptions.Any(x => x.CustomerId == messageModel.CustomerGuid &&
-                                                                           x.TouchPointId == messageModel.TouchpointId))
+                var doesSubscriptionExist = subscriptions != null && subscriptions.Any(x =>
+                                                x.CustomerId == messageModel.CustomerGuid &&
+                                                x.TouchPointId == messageModel.TouchpointId);
+
+                if (IsANewCustomer(messageModel) && !doesSubscriptionExist)
                 {
                     await CreateSubscriptionAsync(messageModel);
                 }
