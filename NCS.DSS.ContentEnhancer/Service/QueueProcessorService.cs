@@ -59,7 +59,7 @@ namespace NCS.DSS.ContentEnhancer.Service
                                 continue;
 
                             var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
-                            var message = new BrokeredMessage(queueItem.Clone());
+                            var message = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
                             await client.SendAsync(message);
                         }
                     }
