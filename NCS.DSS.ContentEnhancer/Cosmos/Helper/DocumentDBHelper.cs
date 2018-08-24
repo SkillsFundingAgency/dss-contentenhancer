@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Configuration;
 using Microsoft.Azure.Documents.Client;
-using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
 {

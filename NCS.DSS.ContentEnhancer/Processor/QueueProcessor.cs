@@ -1,10 +1,9 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.ServiceBus.Messaging;
-
 using NCS.DSS.ContentEnhancer.Service;
 
-namespace NCS.DSS.ContentEnhancer
+namespace NCS.DSS.ContentEnhancer.Processor
 {
     public static class QueueProcessor
     {
@@ -13,7 +12,13 @@ namespace NCS.DSS.ContentEnhancer
             [ServiceBusTrigger("dss.contentqueue", AccessRights.Manage, Connection = "ServiceBusConnectionString")]BrokeredMessage queueItem, 
             TraceWriter log)
         {
-            QueueProcessorService service = new QueueProcessorService();
+            if (queueItem == null)
+            {
+                log.Error("Brokered Message cannot be null");
+                return;
+            }
+
+            var service = new QueueProcessorService();
             await service.SendToTopicAsync(queueItem);
         }
     }

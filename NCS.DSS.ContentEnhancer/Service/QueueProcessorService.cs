@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
 using Microsoft.ServiceBus.Messaging;
-using NCS.DSS.ContentEnhancer.Cosmos.Provider;
+using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Models;
 using Newtonsoft.Json;
 
@@ -18,6 +14,7 @@ namespace NCS.DSS.ContentEnhancer.Service
     public class QueueProcessorService
     {
         readonly string _connectionString = ConfigurationManager.AppSettings["ServiceBusConnectionString"];
+        private readonly SubscriptionHelper _subscriptionHelper = new SubscriptionHelper();
 
         public async Task SendToTopicAsync(BrokeredMessage queueItem)
         {
@@ -31,7 +28,7 @@ namespace NCS.DSS.ContentEnhancer.Service
                 if (messageModel == null)
                     return;
 
-                var subscriptions = await GetSubscriptionsAsync(messageModel);
+                var subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
 
                 var doesSubscriptionExist = subscriptions != null && subscriptions.Any(x =>
                                                 x.CustomerId == messageModel.CustomerGuid &&
@@ -39,7 +36,7 @@ namespace NCS.DSS.ContentEnhancer.Service
 
                 if (IsANewCustomer(messageModel) && !doesSubscriptionExist)
                 {
-                    await CreateSubscriptionAsync(messageModel);
+                    await _subscriptionHelper.CreateSubscriptionAsync(messageModel);
                     queueItem.Complete();
                     return;
                 }
@@ -71,6 +68,11 @@ namespace NCS.DSS.ContentEnhancer.Service
             }
         }
 
+        private static bool IsANewCustomer(MessageModel messageModel)
+        {
+            return messageModel != null && messageModel.IsNewCustomer;
+        }
+
         private static string GetTopic(string touchPointId)
         {
             switch (touchPointId)
@@ -99,50 +101,5 @@ namespace NCS.DSS.ContentEnhancer.Service
                     return string.Empty;
             }
         }
-
-        public bool IsANewCustomer(MessageModel messageModel)
-        {
-            return messageModel != null && messageModel.IsNewCustomer;
-        }
-
-        public async Task<Subscriptions> CreateSubscriptionAsync(MessageModel messageModel)
-        {
-            if (messageModel == null)
-                return null;
-
-            var subcription = new Subscriptions
-            {
-                SubscriptionId = Guid.NewGuid(),
-                CustomerId = messageModel.CustomerGuid.GetValueOrDefault(),
-                TouchPointId = messageModel.TouchpointId,
-                Subscribe = true,
-                LastModifiedDate = messageModel.LastModifiedDate,
-                
-            };
-
-            if (!messageModel.LastModifiedDate.HasValue)
-                subcription.LastModifiedDate = DateTime.Now;
-
-            var documentDbProvider = new DocumentDBProvider();
-
-            var response = await documentDbProvider.CreateSubscriptionsAsync(subcription);
-
-            return response.StatusCode == HttpStatusCode.Created ? (dynamic)response.Resource : (Guid?)null;
-        }
-
-        public async Task<List<Subscriptions>> GetSubscriptionsAsync(MessageModel messageModel)
-        {
-            if (messageModel == null)
-                return null;
-
-            var customerGuid = messageModel.CustomerGuid;
-
-            var documentDbProvider = new DocumentDBProvider();
-            var subscriptions = await documentDbProvider.GetSubscriptionsByCustomerIdAsync(customerGuid);
-
-            return subscriptions;
-        }
-
     }
-
 }
