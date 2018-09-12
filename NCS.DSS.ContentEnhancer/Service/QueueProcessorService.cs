@@ -63,9 +63,9 @@ namespace NCS.DSS.ContentEnhancer.Service
                 }
 
                 //If it is a transfer - also send notification to the target TouchpointId
-                if (messageModel.TargetTouchpointId != "" && !String.IsNullOrWhiteSpace(messageModel.TargetTouchpointId))
+                if (messageModel.TargetIdTransfer != "" && !String.IsNullOrWhiteSpace(messageModel.TargetIdTransfer))
                 {
-                    var topic = GetTopic(messageModel.TargetTouchpointId);
+                    var topic = GetTopic(messageModel.TargetIdTransfer);
                     var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
                     var message = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
                     await client.SendAsync(message);
