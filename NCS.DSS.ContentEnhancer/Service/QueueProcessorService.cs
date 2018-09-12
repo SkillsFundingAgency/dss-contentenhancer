@@ -61,16 +61,6 @@ namespace NCS.DSS.ContentEnhancer.Service
                         }
                     }
                 }
-
-                //If it is a transfer - also send notification to the target TouchpointId
-                if (messageModel.TargetTouchpointId != "" && !String.IsNullOrWhiteSpace(messageModel.TargetTouchpointId))
-                {
-                    var topic = GetTopic(messageModel.TargetTouchpointId);
-                    var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
-                    var message = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
-                    await client.SendAsync(message);
-                }
-
             }
             catch(Exception ex)
             {
@@ -107,6 +97,18 @@ namespace NCS.DSS.ContentEnhancer.Service
                     return "yorkshireandhumber";
                 case "0000000999":
                     return "careershelpline";
+
+
+                ////////////////////////////////////
+                ///////For test team use only///////
+                case "9000000000":
+                    return "dss-test-touchpoint-1";
+                case "9111111111":
+                    return "dss-test-touchpoint-2";
+                case "9222222222":
+                    return "dss-test-touchpoint-3";
+                ////////////////////////////////////
+
                 default:
                     return string.Empty;
             }
