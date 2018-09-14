@@ -47,7 +47,7 @@ namespace NCS.DSS.ContentEnhancer.Service
                     {
                         foreach (var subscription in subscriptions)
                         {
-                            if (messageModel.TouchpointId == subscription.TouchPointId)
+                            if ((messageModel.TouchpointId == subscription.TouchPointId) || (messageModel.TargetIdTransfer == subscription.TouchPointId))
                                 continue;
 
                             var topic = GetTopic(subscription.TouchPointId);
