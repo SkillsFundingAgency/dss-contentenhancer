@@ -28,28 +28,18 @@ namespace NCS.DSS.ContentEnhancer.Service
                 if (messageModel == null)
                     return;
 
+
+                //Get all subscriptions for a customer where touchpointID is not equal to the senders touchpoint id
                 var subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
 
-                var doesSubscriptionExist = subscriptions != null && subscriptions.Any(x =>
-                                                x.CustomerId == messageModel.CustomerGuid &&
-                                                x.TouchPointId == messageModel.TouchpointId);
 
-                if (IsANewCustomer(messageModel) && !doesSubscriptionExist)
-                {
-                    await _subscriptionHelper.CreateSubscriptionAsync(messageModel);
-                    queueItem.Complete();
-                    return;
-                }
-
+                //For each subscription - send notification
                 if (subscriptions != null)
                 {
                     if (subscriptions.Count != 0)
                     {
                         foreach (var subscription in subscriptions)
                         {
-                            if ((messageModel.TouchpointId == subscription.TouchPointId) || (messageModel.TargetIdTransfer == subscription.TouchPointId))
-                                continue;
-
                             var topic = GetTopic(subscription.TouchPointId);
 
                             if (string.IsNullOrWhiteSpace(topic))

@@ -10,6 +10,5 @@ namespace NCS.DSS.ContentEnhancer.Models
         public string URL { get; set; }
         public bool IsNewCustomer { get; set; }
         public string TouchpointId { get; set; }
-        public string TargetIdTransfer { get; set; }
     }
 }

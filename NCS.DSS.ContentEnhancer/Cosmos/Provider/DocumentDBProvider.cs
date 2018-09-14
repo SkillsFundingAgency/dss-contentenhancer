@@ -21,7 +21,7 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
             _databaseClient = new DocumentDBClient();
         }
 
-        public async Task<List<Models.Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId)
+        public async Task<List<Models.Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string SenderTouchPointId)
         {
             var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
 
@@ -30,6 +30,7 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
             var query = client
                 ?.CreateDocumentQuery<Models.Subscriptions>(collectionUri)
                 .Where(x => x.CustomerId == customerId &&
+                            x.TouchPointId != SenderTouchPointId &&
                             x.Subscribe)
                 .AsDocumentQuery();
 

@@ -8,7 +8,7 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 {
     public interface IDocumentDBProvider
     {
-        Task<List<Models.Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId);
+        Task<List<Models.Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string SenderTouchpointId);
         Task<ResourceResponse<Document>> CreateSubscriptionsAsync(Models.Subscriptions subscriptions);
     }
 }

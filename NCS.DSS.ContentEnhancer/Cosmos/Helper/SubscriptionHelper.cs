@@ -40,9 +40,10 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
                 return null;
 
             var customerGuid = messageModel.CustomerGuid;
+            string SenderTouchpointId = messageModel.TouchpointId;
 
             var documentDbProvider = new DocumentDBProvider();
-            var subscriptions = await documentDbProvider.GetSubscriptionsByCustomerIdAsync(customerGuid);
+            var subscriptions = await documentDbProvider.GetSubscriptionsByCustomerIdAsync(customerGuid, SenderTouchpointId);
 
             return subscriptions;
         }
