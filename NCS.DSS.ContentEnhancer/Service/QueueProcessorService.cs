@@ -50,6 +50,7 @@ namespace NCS.DSS.ContentEnhancer.Service
                             message.Properties.Add("RetryCount", 0);
                             message.Properties.Add("RetryHttpStatusCode", "");
                             await client.SendAsync(message);
+                            client.Close();
                         }
                     }
                 }
