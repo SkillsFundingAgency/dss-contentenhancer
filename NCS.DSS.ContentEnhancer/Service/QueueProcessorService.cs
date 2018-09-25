@@ -47,6 +47,8 @@ namespace NCS.DSS.ContentEnhancer.Service
 
                             var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
                             var message = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
+                            message.Properties.Add("RetryCount", 0);
+                            message.Properties.Add("RetryHttpStatusCode", "");
                             await client.SendAsync(message);
                         }
                     }
