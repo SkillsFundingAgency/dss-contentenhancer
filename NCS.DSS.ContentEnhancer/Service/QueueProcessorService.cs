@@ -31,60 +31,42 @@ namespace NCS.DSS.ContentEnhancer.Service
 
             try
             {
-                subscriptions =  await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
+                //Get all subscriptions for a customer where touchpointID is not equal to the senders touchpoint id
+                subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
             }
             catch (Exception ex)
             {
                 throw ex.InnerException ?? ex.GetBaseException();
             }
 
-            var doesSubscriptionExist = subscriptions != null && subscriptions.Any(x =>
-                                            x.CustomerId == messageModel.CustomerGuid &&
-                                            x.TouchPointId == messageModel.TouchpointId);
-
-            if (IsANewCustomer(messageModel) && !doesSubscriptionExist)
-            {
-                try
-                {
-                    await _subscriptionHelper.CreateSubscriptionAsync(messageModel);
-                }
-                catch (Exception ex)
-                {
-                    throw ex.InnerException ?? ex.GetBaseException();
-                }
-                queueItem.Complete();
-                return;
-            }
-
+            //For each subscription - send notification
             if (subscriptions != null)
             {
                 if (subscriptions.Count != 0)
                 {
                     foreach (var subscription in subscriptions)
                     {
-                        if (messageModel.TouchpointId == subscription.TouchPointId)
-                            continue;
-
                         var topic = GetTopic(subscription.TouchPointId);
 
                         if (string.IsNullOrWhiteSpace(topic))
                             continue;
 
                         var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
-                        var message = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
+                        var message =
+                            new BrokeredMessage(
+                                new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
                         message.Properties.Add("RetryCount", 0);
                         message.Properties.Add("RetryHttpStatusCode", "");
-
                         try
                         {
                             await client.SendAsync(message);
-                            client.Close();
                         }
                         catch (Exception ex)
                         {
                             throw ex.InnerException ?? ex.GetBaseException();
                         }
 
+                        client.Close();
                     }
                 }
             }
