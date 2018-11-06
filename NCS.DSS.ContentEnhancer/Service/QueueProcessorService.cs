@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -18,53 +19,74 @@ namespace NCS.DSS.ContentEnhancer.Service
 
         public async Task SendToTopicAsync(BrokeredMessage queueItem)
         {
+
+            var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
+
+            var messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
+
+            if (messageModel == null)
+                return;
+
+            List<Subscriptions> subscriptions;
+
             try
             {
+                subscriptions =  await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
+            }
+            catch (Exception ex)
+            {
+                throw ex.InnerException ?? ex.GetBaseException();
+            }
 
-                var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
+            var doesSubscriptionExist = subscriptions != null && subscriptions.Any(x =>
+                                            x.CustomerId == messageModel.CustomerGuid &&
+                                            x.TouchPointId == messageModel.TouchpointId);
 
-                var messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
-
-                if (messageModel == null)
-                    return;
-
-                var subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
-
-                var doesSubscriptionExist = subscriptions != null && subscriptions.Any(x =>
-                                                x.CustomerId == messageModel.CustomerGuid &&
-                                                x.TouchPointId == messageModel.TouchpointId);
-
-                if (IsANewCustomer(messageModel) && !doesSubscriptionExist)
+            if (IsANewCustomer(messageModel) && !doesSubscriptionExist)
+            {
+                try
                 {
                     await _subscriptionHelper.CreateSubscriptionAsync(messageModel);
-                    queueItem.Complete();
-                    return;
                 }
-
-                if (subscriptions != null)
+                catch (Exception ex)
                 {
-                    if (subscriptions.Count != 0)
+                    throw ex.InnerException ?? ex.GetBaseException();
+                }
+                queueItem.Complete();
+                return;
+            }
+
+            if (subscriptions != null)
+            {
+                if (subscriptions.Count != 0)
+                {
+                    foreach (var subscription in subscriptions)
                     {
-                        foreach (var subscription in subscriptions)
+                        if (messageModel.TouchpointId == subscription.TouchPointId)
+                            continue;
+
+                        var topic = GetTopic(subscription.TouchPointId);
+
+                        if (string.IsNullOrWhiteSpace(topic))
+                            continue;
+
+                        var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
+                        var message =
+                            new BrokeredMessage(
+                                new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
+
+                        try
                         {
-                            if (messageModel.TouchpointId == subscription.TouchPointId)
-                                continue;
-
-                            var topic = GetTopic(subscription.TouchPointId);
-
-                            if (string.IsNullOrWhiteSpace(topic))
-                                continue;
-
-                            var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
-                            var message = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
                             await client.SendAsync(message);
+
                         }
+                        catch (Exception ex)
+                        {
+                            throw ex.InnerException ?? ex.GetBaseException();
+                        }
+
                     }
                 }
-            }
-            catch(Exception ex)
-            {
-                throw ex;
             }
         }
 
