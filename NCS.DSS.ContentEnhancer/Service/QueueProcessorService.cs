@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -18,46 +19,56 @@ namespace NCS.DSS.ContentEnhancer.Service
 
         public async Task SendToTopicAsync(BrokeredMessage queueItem)
         {
+
+            var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
+
+            var messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
+
+            if (messageModel == null)
+                return;
+
+            List<Subscriptions> subscriptions;
+
             try
             {
-
-                var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
-
-                var messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
-
-                if (messageModel == null)
-                    return;
-
-
                 //Get all subscriptions for a customer where touchpointID is not equal to the senders touchpoint id
-                var subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
+                subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
+            }
+            catch (Exception ex)
+            {
+                throw ex.InnerException ?? ex.GetBaseException();
+            }
 
-
-                //For each subscription - send notification
-                if (subscriptions != null)
+            //For each subscription - send notification
+            if (subscriptions != null)
+            {
+                if (subscriptions.Count != 0)
                 {
-                    if (subscriptions.Count != 0)
+                    foreach (var subscription in subscriptions)
                     {
-                        foreach (var subscription in subscriptions)
+                        var topic = GetTopic(subscription.TouchPointId);
+
+                        if (string.IsNullOrWhiteSpace(topic))
+                            continue;
+
+                        var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
+                        var message =
+                            new BrokeredMessage(
+                                new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
+                        message.Properties.Add("RetryCount", 0);
+                        message.Properties.Add("RetryHttpStatusCode", "");
+                        try
                         {
-                            var topic = GetTopic(subscription.TouchPointId);
-
-                            if (string.IsNullOrWhiteSpace(topic))
-                                continue;
-
-                            var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
-                            var message = new BrokeredMessage(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
-                            message.Properties.Add("RetryCount", 0);
-                            message.Properties.Add("RetryHttpStatusCode", "");
                             await client.SendAsync(message);
-                            client.Close();
                         }
+                        catch (Exception ex)
+                        {
+                            throw ex.InnerException ?? ex.GetBaseException();
+                        }
+
+                        client.Close();
                     }
                 }
-            }
-            catch(Exception ex)
-            {
-                throw ex;
             }
         }
 

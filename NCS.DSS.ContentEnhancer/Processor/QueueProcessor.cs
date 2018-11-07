@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.ServiceBus.Messaging;
@@ -19,7 +20,16 @@ namespace NCS.DSS.ContentEnhancer.Processor
             }
 
             var service = new QueueProcessorService();
-            await service.SendToTopicAsync(queueItem);
+            try
+            {
+                await service.SendToTopicAsync(queueItem);
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex.Message);
+                throw;
+            }
+
         }
     }
 }
