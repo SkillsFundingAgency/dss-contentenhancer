@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Host;
 using Microsoft.ServiceBus.Messaging;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Models;
@@ -17,10 +18,14 @@ namespace NCS.DSS.ContentEnhancer.Service
         readonly string _connectionString = ConfigurationManager.AppSettings["ServiceBusConnectionString"];
         private readonly SubscriptionHelper _subscriptionHelper = new SubscriptionHelper();
 
-        public async Task SendToTopicAsync(BrokeredMessage queueItem)
+        public async Task SendToTopicAsync(BrokeredMessage queueItem, TraceWriter log)
         {
-
+     
+            log.Info("Entered SendToTopicAsync");
+        
             var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
+
+            log.Info("got body from stream reader");
 
             var messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
 
@@ -31,12 +36,14 @@ namespace NCS.DSS.ContentEnhancer.Service
 
             try
             {
+                log.Info("getting subscription");
                 //Get all subscriptions for a customer where touchpointID is not equal to the senders touchpoint id
                 subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
             }
             catch (Exception ex)
             {
-                throw ex.InnerException ?? ex.GetBaseException();
+                log.Error("Get Subscriptions Error: " + ex.StackTrace);
+                throw;
             }
 
             //For each subscription - send notification
@@ -44,6 +51,8 @@ namespace NCS.DSS.ContentEnhancer.Service
             {
                 if (subscriptions.Count != 0)
                 {
+                    log.Info("subscription count: " + subscriptions.Count);
+
                     foreach (var subscription in subscriptions)
                     {
                         var topic = GetTopic(subscription.TouchPointId);
@@ -59,22 +68,20 @@ namespace NCS.DSS.ContentEnhancer.Service
                         message.Properties.Add("RetryHttpStatusCode", "");
                         try
                         {
+                            log.Info("sending message to topic");
                             await client.SendAsync(message);
                         }
                         catch (Exception ex)
                         {
-                            throw ex.InnerException ?? ex.GetBaseException();
+                            log.Error("Send Message To Topic Error: " + ex.StackTrace);
+                            //client.Close();
+                            throw;
                         }
 
                         client.Close();
                     }
                 }
             }
-        }
-
-        private static bool IsANewCustomer(MessageModel messageModel)
-        {
-            return messageModel != null && messageModel.IsNewCustomer;
         }
 
         private static string GetTopic(string touchPointId)
