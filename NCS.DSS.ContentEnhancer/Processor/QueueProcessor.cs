@@ -22,14 +22,14 @@ namespace NCS.DSS.ContentEnhancer.Processor
             var service = new QueueProcessorService();
             try
             {
-                await service.SendToTopicAsync(queueItem);
+                log.Info("attempting to call processor service");
+                await service.SendToTopicAsync(queueItem, log);
             }
             catch (Exception ex)
             {
-                log.Error(ex.Message);
+                log.Error(ex.StackTrace);
                 throw;
             }
-
         }
     }
 }
