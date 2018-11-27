@@ -74,7 +74,7 @@ namespace NCS.DSS.ContentEnhancer.Service
                         catch (Exception ex)
                         {
                             log.Error("Send Message To Topic Error: " + ex.StackTrace);
-                            //client.Close();
+                            client.Close();
                             throw;
                         }
 
