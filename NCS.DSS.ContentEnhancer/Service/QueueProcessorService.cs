@@ -20,9 +20,9 @@ namespace NCS.DSS.ContentEnhancer.Service
 
         public async Task SendToTopicAsync(BrokeredMessage queueItem, TraceWriter log)
         {
-     
+
             log.Info("Entered SendToTopicAsync");
-        
+
             var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
 
             log.Info("got body from stream reader");
@@ -31,6 +31,13 @@ namespace NCS.DSS.ContentEnhancer.Service
 
             if (messageModel == null)
                 return;
+
+            //Bypass subscriptions logic for DataCollections Messages
+            if (messageModel.DataCollections.HasValue && messageModel.DataCollections.Value)
+            {
+                await SendMessageAsync(GetTopic(messageModel.TouchpointId), log, messageModel);
+                return;
+            }
 
             List<Subscriptions> subscriptions;
 
@@ -60,29 +67,38 @@ namespace NCS.DSS.ContentEnhancer.Service
                         if (string.IsNullOrWhiteSpace(topic))
                             continue;
 
-                        var client = TopicClient.CreateFromConnectionString(_connectionString, topic);
-                        var message =
-                            new BrokeredMessage(
-                                new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel))));
-                        message.Properties.Add("RetryCount", 0);
-                        message.Properties.Add("RetryHttpStatusCode", "");
-                        try
-                        {
-                            log.Info("sending message to topic");
-                            await client.SendAsync(message);
-                        }
-                        catch (Exception ex)
-                        {
-                            log.Error("Send Message To Topic Error: " + ex.StackTrace);
-                            client.Close();
-                            throw;
-                        }
-
-                        client.Close();
+                            await SendMessageAsync(topic, log, messageModel);
                     }
                 }
             }
         }
+
+
+        private async Task SendMessageAsync(string Topic, TraceWriter log, MessageModel messageModel)
+        {
+            var client = TopicClient.CreateFromConnectionString(_connectionString, Topic);
+            var message = new BrokeredMessage(
+                            new MemoryStream(Encoding.UTF8.GetBytes(
+                                JsonConvert.SerializeObject(messageModel))));
+
+            message.Properties.Add("RetryCount", 0);
+            message.Properties.Add("RetryHttpStatusCode", "");
+
+            try
+            {
+                log.Info("sending message to topic");
+                await client.SendAsync(message);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Send Message To Topic Error: " + ex.StackTrace);
+                client.Close();
+                throw;
+            }
+
+            client.Close();
+        }
+    
 
         private static string GetTopic(string touchPointId)
         {
