@@ -33,7 +33,7 @@ namespace NCS.DSS.ContentEnhancer.Service
                 return;
 
             //Bypass subscriptions logic for DataCollections Messages
-            if (messageModel.DataCollections.HasValue && messageModel.DataCollections.Value)
+            if (messageModel.DataCollections.HasValue && messageModel.DataCollections == true)
             {
                 await SendMessageAsync(GetTopic(messageModel.TouchpointId), log, messageModel);
                 return;
