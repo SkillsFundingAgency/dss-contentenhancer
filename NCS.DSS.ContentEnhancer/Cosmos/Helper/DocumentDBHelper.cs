@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using Microsoft.Azure.Documents.Client;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
@@ -8,8 +7,8 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
     {
         private Uri _documentCollectionUri;
         private Uri _documentUri;
-        private readonly string _databaseId = ConfigurationManager.AppSettings["DatabaseId"];
-        private readonly string _collectionId = ConfigurationManager.AppSettings["CollectionId"];
+        private readonly string _databaseId = Environment.GetEnvironmentVariable("DatabaseId");
+        private readonly string _collectionId = Environment.GetEnvironmentVariable("CollectionId");
 
 
         public Uri CreateDocumentCollectionUri()

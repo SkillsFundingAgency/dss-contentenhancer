@@ -1,33 +1,37 @@
 using System;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.ServiceBus.Messaging;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Service;
 
 namespace NCS.DSS.ContentEnhancer.Processor
 {
-    public static class QueueProcessor
+    public class QueueProcessor
     {
+        private readonly IQueueProcessorService _queueProcessorService;
+
+        public QueueProcessor(IQueueProcessorService queueProcessorService)
+        {
+            _queueProcessorService = queueProcessorService;
+        }
+
         [FunctionName("QueueProcessor")]
-        public static async System.Threading.Tasks.Task RunAsync(
-            [ServiceBusTrigger("dss.contentqueue", AccessRights.Manage, Connection = "ServiceBusConnectionString")]BrokeredMessage queueItem, 
-            TraceWriter log)
+        public async System.Threading.Tasks.Task RunAsync([ServiceBusTrigger("dss.contentqueue", Connection = "ServiceBusConnectionString")]Message queueItem, ILogger log)
         {
             if (queueItem == null)
             {
-                log.Error("Brokered Message cannot be null");
-                return;
+                log.LogError("Brokered Message cannot be null");
+                throw new ArgumentNullException(nameof(queueItem));
             }
 
-            var service = new QueueProcessorService();
             try
             {
-                log.Info("attempting to call processor service");
-                await service.SendToTopicAsync(queueItem, log);
+                log.LogInformation("attempting to call processor service");
+                await _queueProcessorService.SendToTopicAsync(queueItem, log);
             }
             catch (Exception ex)
             {
-                log.Error(ex.StackTrace);
+                log.LogError(ex.StackTrace);
                 throw;
             }
         }

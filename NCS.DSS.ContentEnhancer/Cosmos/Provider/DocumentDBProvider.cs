@@ -12,16 +12,16 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 {
     public class DocumentDBProvider : IDocumentDBProvider
     {
-        private readonly DocumentDBHelper _documentDbHelper;
-        private readonly DocumentDBClient _databaseClient;
+        private readonly IDocumentDBHelper _documentDbHelper;
+        private readonly IDocumentDBClient _databaseClient;
 
-        public DocumentDBProvider()
+        public DocumentDBProvider(IDocumentDBHelper documentDbHelper, IDocumentDBClient documentDbClient)
         {
-            _documentDbHelper = new DocumentDBHelper();
-            _databaseClient = new DocumentDBClient();
+            _documentDbHelper = documentDbHelper;
+            _databaseClient = documentDbClient;
         }
 
-        public async Task<List<Models.Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string SenderTouchPointId)
+        public async Task<List<Models.Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string senderTouchPointId)
         {
             var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
 
@@ -30,7 +30,7 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
             var query = client
                 ?.CreateDocumentQuery<Models.Subscriptions>(collectionUri)
                 .Where(x => x.CustomerId == customerId &&
-                            x.TouchPointId != SenderTouchPointId &&
+                            x.TouchPointId != senderTouchPointId &&
                             x.Subscribe)
                 .AsDocumentQuery();
 
