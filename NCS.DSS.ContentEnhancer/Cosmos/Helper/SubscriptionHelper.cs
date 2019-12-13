@@ -58,7 +58,8 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
 
             var subscriptions = await _dbProvider.GetSubscriptionsByCustomerIdAsync(customerGuid, senderTouchPointId);
 
-            logger.LogInformation(string.Format("Retrieved {0} Subscriptions From DB ", subscriptions.Count));
+            if(subscriptions != null)
+                logger.LogInformation(string.Format("Retrieved {0} Subscriptions From DB ", subscriptions.Count));
 
             return subscriptions;
         }
