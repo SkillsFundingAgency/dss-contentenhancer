@@ -1,41 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.ServiceBus.Messaging;
+using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus.InteropExtensions;
+using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Models;
 using Newtonsoft.Json;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
-    public class QueueProcessorService
+    public class QueueProcessorService : IQueueProcessorService
     {
-        readonly string _connectionString = ConfigurationManager.AppSettings["ServiceBusConnectionString"];
-        private readonly SubscriptionHelper _subscriptionHelper = new SubscriptionHelper();
+        readonly string _connectionString = Environment.GetEnvironmentVariable("ServiceBusConnectionString");
+        private readonly ISubscriptionHelper _subscriptionHelper;
 
-        public async Task SendToTopicAsync(BrokeredMessage queueItem, TraceWriter log)
+        public QueueProcessorService(ISubscriptionHelper subscriptionHelper)
         {
+            _subscriptionHelper = subscriptionHelper;
+        }
 
-            log.Info("Entered SendToTopicAsync");
+        public async Task SendToTopicAsync(Message queueItem, ILogger log)
+        {
+            log.LogInformation("Entered SendToTopicAsync");
 
-            var body = new StreamReader(queueItem.GetBody<Stream>(), Encoding.UTF8).ReadToEnd();
+            var body = string.Empty;
 
-            log.Info("got body from stream reader");
+            log.LogInformation("got body from stream reader");
 
-            var messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
 
+            try
+            {
+                body = Encoding.UTF8.GetString(queueItem.Body);
+            }
+            catch (Exception ex)
+            {
+                log.LogError("Unable to retrieve body from Message", ex.Message);
+            }
+            
+            MessageModel messageModel;
+
+            log.LogInformation("Deserialize body into message model");
+
+            try
+            {
+                messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
+            }
+            catch (JsonException ex)
+            {
+                log.LogError("Unable to retrieve body from req", ex.Message);
+                throw;
+            }
+            
             if (messageModel == null)
                 return;
 
             //Bypass subscriptions logic for DataCollections Messages
             if (messageModel.DataCollections.HasValue && messageModel.DataCollections == true)
             {
-                await SendMessageAsync(GetTopic(messageModel.TouchpointId), log, messageModel);
+                log.LogInformation("Send Message Async to Topic");
+                await SendMessageToTopicAsync(GetTopic(messageModel.TouchpointId), log, messageModel);
                 return;
             }
 
@@ -43,13 +69,13 @@ namespace NCS.DSS.ContentEnhancer.Service
 
             try
             {
-                log.Info("getting subscription");
+                log.LogInformation("getting subscriptions for customer");
                 //Get all subscriptions for a customer where touchpointID is not equal to the senders touchpoint id
-                subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel);
+                subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel, log);
             }
             catch (Exception ex)
             {
-                log.Error("Get Subscriptions Error: " + ex.StackTrace);
+                log.LogError("Get Subscriptions Error: " + ex.StackTrace);
                 throw;
             }
 
@@ -58,7 +84,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             {
                 if (subscriptions.Count != 0)
                 {
-                    log.Info("subscription count: " + subscriptions.Count);
+                    log.LogInformation(string.Format("subscription count: {0} ", subscriptions.Count));
 
                     foreach (var subscription in subscriptions)
                     {
@@ -67,38 +93,40 @@ namespace NCS.DSS.ContentEnhancer.Service
                         if (string.IsNullOrWhiteSpace(topic))
                             continue;
 
-                            await SendMessageAsync(topic, log, messageModel);
+                        log.LogInformation(string.Format("Send Message to Topic {0}", topic));
+
+                        await SendMessageToTopicAsync(topic, log, messageModel);
                     }
                 }
             }
         }
 
-
-        private async Task SendMessageAsync(string Topic, TraceWriter log, MessageModel messageModel)
+        private async Task SendMessageToTopicAsync(string topic, ILogger log, MessageModel messageModel)
         {
-            var client = TopicClient.CreateFromConnectionString(_connectionString, Topic);
-            var message = new BrokeredMessage(
-                            new MemoryStream(Encoding.UTF8.GetBytes(
-                                JsonConvert.SerializeObject(messageModel))));
+            var client = new TopicClient(_connectionString, topic);
+            var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel)));
 
-            message.Properties.Add("RetryCount", 0);
-            message.Properties.Add("RetryHttpStatusCode", "");
+            message.UserProperties.Add("RetryCount", 0);
+            message.UserProperties.Add("RetryHttpStatusCode", "");
 
             try
             {
-                log.Info("sending message to topic");
+                log.LogInformation("sending message to topic");
                 await client.SendAsync(message);
             }
             catch (Exception ex)
             {
-                log.Error("Send Message To Topic Error: " + ex.StackTrace);
-                client.Close();
+                log.LogError("Send Message To Topic Error: " + ex.StackTrace);
+                await client.CloseAsync();
                 throw;
             }
+            finally
+            {
+                if(!client.IsClosedOrClosing)
+                    await client.CloseAsync();
+            }
 
-            client.Close();
         }
-    
 
         private static string GetTopic(string touchPointId)
         {
