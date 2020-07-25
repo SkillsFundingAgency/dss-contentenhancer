@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using Microsoft.Azure.Documents.Client;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Client
@@ -13,8 +14,8 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Client
                 return _documentClient;
 
             _documentClient = new DocumentClient(new Uri(
-                Environment.GetEnvironmentVariable("Endpoint")),
-            Environment.GetEnvironmentVariable("Key"));
+                ConfigurationManager.AppSettings["Endpoint"]),
+                ConfigurationManager.AppSettings["Key"]);
 
             return _documentClient;
         }
