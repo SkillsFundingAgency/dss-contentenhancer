@@ -19,6 +19,6 @@ namespace NCS.DSS.ContentEnhancer.Models
         public string LastName { get; set; }
         public bool IsDigitalAccount { get; set; }
         public bool? CreateDigitalIdentity { get; set; }
-        public bool? CloseDigitalAccount { get; set; }
+        public bool? DeleteDigitalIdentity { get; set; }
     }
 }

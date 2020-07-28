@@ -40,7 +40,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             {
                 log.LogError("Unable to retrieve body from Message", ex.Message);
             }
-            
+
             MessageModel messageModel;
 
             log.LogInformation("Deserialize body into message model");
@@ -54,7 +54,7 @@ namespace NCS.DSS.ContentEnhancer.Service
                 log.LogError("Unable to retrieve body from req", ex.Message);
                 throw;
             }
-            
+
             if (messageModel == null)
                 return;
 
@@ -81,10 +81,11 @@ namespace NCS.DSS.ContentEnhancer.Service
             }
 
             // If source of data came from DigitalIdentity service then send message to digitalidentities topic
-            if(messageModel.IsDigitalAccount)
+            if (messageModel.IsDigitalAccount)
             {
                 await SendMessageToTopicAsync(_digitalIdentitiesTopic, log, messageModel);
             }
+
 
             //For each subscription - send notification
             if (subscriptions != null)
@@ -129,7 +130,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             }
             finally
             {
-                if(!client.IsClosedOrClosing)
+                if (!client.IsClosedOrClosing)
                     await client.CloseAsync();
             }
 
