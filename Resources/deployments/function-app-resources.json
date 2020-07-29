@@ -78,6 +78,10 @@
             {
               "name": "ServiceBusConnectionString",
               "value": "[parameters('serviceBusConnectionString')]"
+            },
+            {
+              "name": "DigitalIdentitiesTopic",
+              "value": "digitalidentity"
             }
           ]
         }
