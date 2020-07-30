@@ -16,7 +16,7 @@ namespace NCS.DSS.ContentEnhancer.Service
     {
         readonly string _connectionString = Environment.GetEnvironmentVariable("ServiceBusConnectionString");
         private readonly ISubscriptionHelper _subscriptionHelper;
-        readonly string _digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigialIdentitiesTopic");
+        readonly string _digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
 
         public QueueProcessorService(ISubscriptionHelper subscriptionHelper)
         {
