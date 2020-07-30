@@ -39,9 +39,11 @@
       "location": "[resourceGroup().location]",
       "kind": "functionapp",
       "properties": {
+        "httpsOnly": true,
         "serverFarmId": "[parameters('appServicePlanId')]",
         "siteConfig": {
           "alwaysOn": true,
+          "mintlsVersion": "1.2",
           "appSettings": [
             {
               "name": "EnvironmentName",
@@ -78,6 +80,10 @@
             {
               "name": "ServiceBusConnectionString",
               "value": "[parameters('serviceBusConnectionString')]"
+            },
+            {
+              "name": "DigitalIdentitiesTopic",
+              "value": "digitalidentity"
             }
           ]
         }
