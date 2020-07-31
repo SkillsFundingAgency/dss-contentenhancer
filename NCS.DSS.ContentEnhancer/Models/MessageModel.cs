@@ -20,5 +20,6 @@ namespace NCS.DSS.ContentEnhancer.Models
         public bool IsDigitalAccount { get; set; }
         public bool? CreateDigitalIdentity { get; set; }
         public bool? DeleteDigitalIdentity { get; set; }
+        public bool? IdentityStoreId { get; set; }
     }
 }
