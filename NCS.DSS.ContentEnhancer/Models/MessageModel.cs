@@ -12,14 +12,24 @@ namespace NCS.DSS.ContentEnhancer.Models
         public string TouchpointId { get; set; }
         public bool? DataCollections { get; set; }
 
-
         //Create Digital Identity Fields
         public string EmailAddress { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public DateTime? DoB { get; set; }
+
+        //Delete digital identity fields (set from dss-digitalidentity)
+        public bool? IdentityStoreId { get; set; }
+
+        //Update Email (set from dss-contacts)
+        public string CurrentEmail { get; set; }
+        public string NewEmail { get; set; }
+
+        //generic digital identity fields (set from either dss-identity, or dss-contacts)
         public bool IsDigitalAccount { get; set; }
         public bool? CreateDigitalIdentity { get; set; }
         public bool? DeleteDigitalIdentity { get; set; }
-        public bool? IdentityStoreId { get; set; }
+        public bool? ChangeEmailAddress { get; set; }
+
     }
 }
