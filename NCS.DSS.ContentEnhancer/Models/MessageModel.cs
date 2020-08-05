@@ -16,7 +16,6 @@ namespace NCS.DSS.ContentEnhancer.Models
         public string EmailAddress { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime? DoB { get; set; }
 
         //Delete digital identity fields (set from dss-digitalidentity)
         public Guid? IdentityStoreId { get; set; }
