@@ -29,6 +29,6 @@ namespace NCS.DSS.ContentEnhancer.Models
         public bool? CreateDigitalIdentity { get; set; }
         public bool? DeleteDigitalIdentity { get; set; }
         public bool? ChangeEmailAddress { get; set; }
-
+        public bool? UpdateDigitalIdentity { get; set; }
     }
 }
