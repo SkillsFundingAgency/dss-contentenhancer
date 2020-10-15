@@ -1,17 +1,16 @@
-﻿using Microsoft.Azure.Documents;
-using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using NCS.DSS.ContentEnhancer;
 using NCS.DSS.ContentEnhancer.Cosmos.Client;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Cosmos.Provider;
-using NCS.DSS.ContentEnhancer.Ioc;
 using NCS.DSS.ContentEnhancer.Service;
 
-[assembly: FunctionsStartup(typeof(FunctionStartupExtension))]
+[assembly: FunctionsStartup(typeof(Startup))]
 
-namespace NCS.DSS.ContentEnhancer.Ioc
+namespace NCS.DSS.ContentEnhancer
 {
-    public class FunctionStartupExtension : FunctionsStartup
+    public class Startup : FunctionsStartup
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
