@@ -6,5 +6,5 @@ This repo is responsible processing messages from one queue and determining what
 
 ## Developer Setup
 
-Application settings can be found on the DFC confluence page - [https://skillsfundingagency.atlassian.net/wiki/spaces/DFC/pages/2515894273/Address+dss-address]
+Application settings can be found on the DFC confluence page - [https://skillsfundingagency.atlassian.net/wiki/spaces/DFC/pages/2061500935/Content+Enhancer+dss-contentenhancer]
 
