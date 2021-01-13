@@ -25,7 +25,7 @@ namespace NCS.DSS.ContentEnhancer.Models
         public string NewEmail { get; set; }
 
         //generic digital identity fields (set from either dss-identity, or dss-contacts)
-        public bool IsDigitalAccount { get; set; }
+        public bool? IsDigitalAccount { get; set; }
         public bool? CreateDigitalIdentity { get; set; }
         public bool? DeleteDigitalIdentity { get; set; }
         public bool? ChangeEmailAddress { get; set; }

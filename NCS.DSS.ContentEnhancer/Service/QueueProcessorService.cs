@@ -81,7 +81,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             }
 
             // If source of data came from DigitalIdentity service then send message to digitalidentities topic
-            if (messageModel.IsDigitalAccount)
+            if (messageModel.IsDigitalAccount.GetValueOrDefault())
             {
                 await SendMessageToTopicAsync(_digitalIdentitiesTopic, log, messageModel);
             }
