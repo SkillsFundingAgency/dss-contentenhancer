@@ -22,10 +22,10 @@ namespace NCS.DSS.ContentEnhancer
             builder.Services.AddSingleton<IDocumentDBProvider, DocumentDBProvider>();
             builder.Services.AddSingleton<IDocumentDBClient, DocumentDBClient>();
             builder.Services.AddOptions<TouchpointTopics>()
-    .Configure<IConfiguration>((settings, configuration) =>
-    {
-        configuration.GetSection("EnabledTouchPoints").Bind(settings);
-    });
+                .Configure<IConfiguration>((settings, configuration) =>
+                {     
+                    configuration.GetSection("TouchpointTopics").Bind(settings); 
+                });
         }
     }
 }

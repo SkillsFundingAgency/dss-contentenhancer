@@ -142,11 +142,13 @@ namespace NCS.DSS.ContentEnhancer.Service
 
         private  string GetTopic(string touchPointId, ILogger log)
         {
-            if (_touchpoints.EnabledTouchPoints.Contains(touchPointId))
-            {
-                
+            var enabledTouchPoints = _touchpoints.EnabledTouchPoints;
+
+            if (enabledTouchPoints != null && enabledTouchPoints.Contains(touchPointId))
+            {         
                 return touchPointId;
             }
+
             log.LogWarning("Touchpoint {0} invalid, returning empty string", touchPointId);
             return String.Empty;
         }
