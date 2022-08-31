@@ -25,6 +25,9 @@
     },
     "serviceBusConnectionString": {
       "type": "string"
+    },
+    "enabledTouchPoints" : {
+      "type": "string"
     }
   },
   "variables": {
@@ -84,6 +87,10 @@
             {
               "name": "DigitalIdentitiesTopic",
               "value": "digitalidentity"
+            },
+            {
+              "name": "EnabledTouchPoints",
+              "value": "[parameters('enabledTouchPoints')]"
             }
           ]
         }
