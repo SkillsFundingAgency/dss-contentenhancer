@@ -147,8 +147,8 @@ namespace NCS.DSS.ContentEnhancer.Service
                 
                 return touchPointId;
             }
-            log.LogWarning("Touchpoint invalid, returning null");
-            return null;
+            log.LogWarning("Touchpoint {0} invalid, returning empty string", touchPointId);
+            return String.Empty;
         }
     }
 }
