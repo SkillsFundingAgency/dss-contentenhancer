@@ -1,9 +1,11 @@
 ﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NCS.DSS.ContentEnhancer;
 using NCS.DSS.ContentEnhancer.Cosmos.Client;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Cosmos.Provider;
+using NCS.DSS.ContentEnhancer.Models;
 using NCS.DSS.ContentEnhancer.Service;
 
 [assembly: FunctionsStartup(typeof(Startup))]
@@ -19,6 +21,11 @@ namespace NCS.DSS.ContentEnhancer
             builder.Services.AddSingleton<IDocumentDBHelper, DocumentDBHelper>();
             builder.Services.AddSingleton<IDocumentDBProvider, DocumentDBProvider>();
             builder.Services.AddSingleton<IDocumentDBClient, DocumentDBClient>();
+            builder.Services.AddOptions<TouchpointTopics>()
+    .Configure<IConfiguration>((settings, configuration) =>
+    {
+        configuration.GetSection("EnabledTouchPoints").Bind(settings);
+    });
         }
     }
 }
