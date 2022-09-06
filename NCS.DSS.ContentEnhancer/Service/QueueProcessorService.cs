@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Models;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
@@ -16,6 +17,8 @@ namespace NCS.DSS.ContentEnhancer.Service
     {
         readonly string _connectionString = Environment.GetEnvironmentVariable("ServiceBusConnectionString");
         private readonly ISubscriptionHelper _subscriptionHelper;
+        private readonly string[] _activeTouchPoints = Environment.GetEnvironmentVariable("ActiveTouchPoints")
+            ?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         public QueueProcessorService(ISubscriptionHelper subscriptionHelper)
         {
@@ -61,7 +64,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             if (messageModel.DataCollections.HasValue && messageModel.DataCollections == true)
             {
                 log.LogInformation("Send Message Async to Topic");
-                await SendMessageToTopicAsync(GetTopic(messageModel.TouchpointId), log, messageModel);
+                await SendMessageToTopicAsync(GetTopic(messageModel.TouchpointId, log), log, messageModel);
                 return;
             }
 
@@ -88,7 +91,7 @@ namespace NCS.DSS.ContentEnhancer.Service
 
                     foreach (var subscription in subscriptions)
                     {
-                        var topic = GetTopic(subscription.TouchPointId);
+                        var topic = GetTopic(subscription.TouchPointId, log);
 
                         if (string.IsNullOrWhiteSpace(topic))
                             continue;
@@ -128,45 +131,15 @@ namespace NCS.DSS.ContentEnhancer.Service
 
         }
 
-        private static string GetTopic(string touchPointId)
+        private string GetTopic(string touchPointId, ILogger logger)
         {
-            switch (touchPointId)
+            if (_activeTouchPoints != null && _activeTouchPoints.Contains(touchPointId))
             {
-                case "0000000101":
-                    return "eastandbucks";
-                case "0000000102":
-                    return "eastandnorthampton";
-                case "0000000103":
-                    return "london";
-                case "0000000104":
-                    return "westmidsandstaffs";
-                case "0000000105":
-                    return "northwest";
-                case "0000000106":
-                    return "northeastandcumbria";
-                case "0000000107":
-                    return "southeast";
-                case "0000000108":
-                    return "southwestandoxford";
-                case "0000000109":
-                    return "yorkshireandhumber";
-                case "0000000999":
-                    return "careershelpline";
-
-
-                ////////////////////////////////////
-                ///////For test team use only///////
-                case "9000000000":
-                    return "dss-test-touchpoint-1";
-                case "9111111111":
-                    return "dss-test-touchpoint-2";
-                case "9222222222":
-                    return "dss-test-touchpoint-3";
-                ////////////////////////////////////
-
-                default:
-                    return string.Empty;
+                return touchPointId;
             }
+
+            logger.LogWarning("Touchpoint {0} invalid, returning empty string", touchPointId);
+            return string.Empty;
         }
     }
 }

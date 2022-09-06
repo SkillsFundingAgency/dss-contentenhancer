@@ -26,6 +26,9 @@
     "serviceBusConnectionString": {
       "type": "string"
     },
+    "activeTouchPoints" : {
+      "type": "string"
+    },
     "sharedAppServicePlanName": {
       "type": "string"
     },
@@ -72,6 +75,9 @@
                 },
                 "serviceBusConnectionString": {
                   "value": "[parameters('serviceBusConnectionString')]"
+                },
+                "activeTouchPoints": {
+                  "value": "[parameters('activeTouchPoints')]"
                 }
               }
             },
