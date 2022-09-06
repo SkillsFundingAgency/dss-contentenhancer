@@ -19,7 +19,7 @@ namespace NCS.DSS.ContentEnhancer.Service
         readonly string _connectionString = Environment.GetEnvironmentVariable("ServiceBusConnectionString");
         private readonly ISubscriptionHelper _subscriptionHelper;
         readonly string _digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
-        readonly string[] enabledTouchPoints = Environment.GetEnvironmentVariable("EnabledTouchPoints")
+        private readonly string[] _activeTouchPoints = Environment.GetEnvironmentVariable("ActiveTouchPoints")
             ?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         public QueueProcessorService(ISubscriptionHelper subscriptionHelper)
@@ -142,7 +142,7 @@ namespace NCS.DSS.ContentEnhancer.Service
 
         private  string GetTopic(string touchPointId, ILogger log)
         {
-            if (enabledTouchPoints != null && enabledTouchPoints.Contains(touchPointId))
+            if (_activeTouchPoints != null && _activeTouchPoints.Contains(touchPointId))
             {         
                 return touchPointId;
             }
