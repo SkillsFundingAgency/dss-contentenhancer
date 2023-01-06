@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Azure.ServiceBus;
-using Microsoft.Azure.ServiceBus.InteropExtensions;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Models;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Options;
 using System.Linq;
+using Azure.Messaging.ServiceBus;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
@@ -22,51 +21,27 @@ namespace NCS.DSS.ContentEnhancer.Service
         private readonly string[] _activeTouchPoints = Environment.GetEnvironmentVariable("ActiveTouchPoints")
             ?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
+        private readonly ServiceBusClient _client;
+
         public QueueProcessorService(ISubscriptionHelper subscriptionHelper)
         {
             _subscriptionHelper = subscriptionHelper;
+            _client = new ServiceBusClient(_connectionString);
         }
 
-        public async Task SendToTopicAsync(Message queueItem, ILogger log)
+        public async Task SendToTopicAsync(MessageModel message, ILogger log)
         {
             log.LogInformation("Entered SendToTopicAsync");
 
-            var body = string.Empty;
 
-            log.LogInformation("got body from stream reader");
-
-
-            try
-            {
-                body = Encoding.UTF8.GetString(queueItem.Body);
-            }
-            catch (Exception ex)
-            {
-                log.LogError("Unable to retrieve body from Message", ex.Message);
-            }
-
-            MessageModel messageModel;
-
-            log.LogInformation("Deserialize body into message model");
-
-            try
-            {
-                messageModel = JsonConvert.DeserializeObject<MessageModel>(body);
-            }
-            catch (JsonException ex)
-            {
-                log.LogError("Unable to retrieve body from req", ex.Message);
-                throw;
-            }
-
-            if (messageModel == null)
+            if (message == null)
                 return;
 
             //Bypass subscriptions logic for DataCollections Messages
-            if (messageModel.DataCollections.HasValue && messageModel.DataCollections == true)
+            if (message.DataCollections.HasValue && message.DataCollections == true)
             {
                 log.LogInformation("Send Message Async to Topic");
-                await SendMessageToTopicAsync(GetTopic(messageModel.TouchpointId, log), log, messageModel);
+                await SendMessageToTopicAsync(GetTopic(message.TouchpointId, log), log, message);
                 return;
             }
 
@@ -76,7 +51,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             {
                 log.LogInformation("getting subscriptions for customer");
                 //Get all subscriptions for a customer where touchpointID is not equal to the senders touchpoint id
-                subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(messageModel, log);
+                subscriptions = await _subscriptionHelper.GetSubscriptionsAsync(message, log);
             }
             catch (Exception ex)
             {
@@ -85,9 +60,9 @@ namespace NCS.DSS.ContentEnhancer.Service
             }
 
             // If source of data came from DigitalIdentity service then send message to digitalidentities topic
-            if (messageModel.IsDigitalAccount.GetValueOrDefault())
+            if (message.IsDigitalAccount.GetValueOrDefault())
             {
-                await SendMessageToTopicAsync(_digitalIdentitiesTopic, log, messageModel);
+                await SendMessageToTopicAsync(_digitalIdentitiesTopic, log, message);
             }
 
 
@@ -107,7 +82,7 @@ namespace NCS.DSS.ContentEnhancer.Service
 
                         log.LogInformation(string.Format("Send Message to Topic {0}", topic));
 
-                        await SendMessageToTopicAsync(topic, log, messageModel);
+                        await SendMessageToTopicAsync(topic, log, message);
                     }
                 }
             }
@@ -115,29 +90,21 @@ namespace NCS.DSS.ContentEnhancer.Service
 
         private async Task SendMessageToTopicAsync(string topic, ILogger log, MessageModel messageModel)
         {
-            var client = new TopicClient(_connectionString, topic);
-            var message = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel)));
-
-            message.UserProperties.Add("RetryCount", 0);
-            message.UserProperties.Add("RetryHttpStatusCode", "");
+            await using var sender = _client.CreateSender(topic);
+            var message = new ServiceBusMessage(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel)));
+            message.ApplicationProperties.Add("RetryCount", 0);
+            message.ApplicationProperties.Add("RetryHttpStatusCode", "");
 
             try
             {
-                log.LogInformation("sending message to topic");
-                await client.SendAsync(message);
+                log.LogInformation("sending message to topic {0}", topic);
+                await sender.SendMessageAsync(message);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                log.LogError("Send Message To Topic Error: " + ex.StackTrace);
-                await client.CloseAsync();
+                log.LogError("Send Message To Topic Error: " + e.StackTrace);
                 throw;
             }
-            finally
-            {
-                if (!client.IsClosedOrClosing)
-                    await client.CloseAsync();
-            }
-            
         }
 
         private  string GetTopic(string touchPointId, ILogger log)
