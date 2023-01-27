@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
+using NCS.DSS.ContentEnhancer.Models;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
     public interface IQueueProcessorService
     {
-        Task SendToTopicAsync(Message queueItem, ILogger log);
+        Task SendToTopicAsync(MessageModel message, ILogger log);
     }
 }

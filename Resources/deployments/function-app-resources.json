@@ -47,6 +47,7 @@
         "siteConfig": {
           "alwaysOn": true,
           "mintlsVersion": "1.2",
+          "netFrameworkVersion": "v6.0",
           "appSettings": [
             {
               "name": "EnvironmentName",
@@ -54,7 +55,7 @@
             },
             {
               "name": "FUNCTIONS_EXTENSION_VERSION",
-              "value": "~3"
+              "value": "~4"
             },
             {
               "name": "MSDEPLOY_RENAME_LOCKED_FILES",
