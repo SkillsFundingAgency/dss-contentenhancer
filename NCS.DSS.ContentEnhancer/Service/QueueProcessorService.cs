@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Models;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Options;
 using System.Linq;
 using Azure.Messaging.ServiceBus;
 
