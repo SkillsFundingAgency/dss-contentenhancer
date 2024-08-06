@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using NCS.DSS.ContentEnhancer.Cosmos.Client;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Cosmos.Provider;
+using NCS.DSS.ContentEnhancer.Processor;
 using NCS.DSS.ContentEnhancer.Service;
 
 var host = new HostBuilder()
@@ -11,7 +12,9 @@ var host = new HostBuilder()
     {
         services.AddSingleton<ISubscriptionHelper, SubscriptionHelper>();
         services.AddSingleton<IQueueProcessorService, QueueProcessorService>();
+        services.AddSingleton<IQueueProcessor, QueueProcessor>();
         services.AddSingleton<IDocumentDBHelper, DocumentDBHelper>();
+        services.AddSingleton<IMessageHelper, MessageHelper>();
         services.AddSingleton<IDocumentDBProvider, DocumentDBProvider>();
         services.AddSingleton<IDocumentDBClient, DocumentDBClient>();
     })

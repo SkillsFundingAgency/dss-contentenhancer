@@ -6,6 +6,6 @@ namespace NCS.DSS.ContentEnhancer.Service
 {
     public interface IQueueProcessorService
     {
-        Task SendToTopicAsync(MessageModel message, ILogger log);
+        Task SendToTopicAsync(MessageModel message, ILogger log);        
     }
 }
