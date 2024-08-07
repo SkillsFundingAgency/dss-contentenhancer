@@ -17,7 +17,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
             _logger = logger;
         }
 
-        [Function("QueueProcessor")]
+        [Function("QueueProcessorV2")]
         public async Task RunAsync([ServiceBusTrigger("dss.contentqueue", Connection = "ServiceBusConnectionString")]MessageModel message)
         {
             if (message == null)
