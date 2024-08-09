@@ -1,7 +1,7 @@
 # DSS Content Enhancer
 
 > [!NOTE]  
-> The latest version of this API is `v1`
+> The latest version of this API is `v2`
 
 [![Build Status](https://sfa-gov-uk.visualstudio.com/CDS%202.0/_apis/build/status/Yaml/dss-contentenhancer?repoName=SkillsFundingAgency%2Fdss-contentenhancer&branchName=master)](https://sfa-gov-uk.visualstudio.com/CDS%202.0/_build/latest?definitionId=1840&repoName=SkillsFundingAgency%2Fdss-contentenhancer&branchName=master)
 

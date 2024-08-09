@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using NCS.DSS.ContentEnhancer.Cosmos.Provider;
+using NCS.DSS.ContentEnhancer.Models;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using NCS.DSS.ContentEnhancer.Cosmos.Provider;
-using NCS.DSS.ContentEnhancer.Models;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
 {
@@ -58,7 +58,7 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
 
             var subscriptions = await _dbProvider.GetSubscriptionsByCustomerIdAsync(customerGuid, senderTouchPointId);
 
-            if(subscriptions != null)
+            if (subscriptions != null)
                 logger.LogInformation(string.Format("Retrieved {0} Subscriptions From DB ", subscriptions.Count));
 
             return subscriptions;
