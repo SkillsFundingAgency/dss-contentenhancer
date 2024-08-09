@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Models;
-using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
@@ -32,7 +31,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             if (message.DataCollections.HasValue && message.DataCollections == true)
             {
                 var topic = _messageHelper.GetTopic(message.TouchpointId, log);
-                log.LogInformation("Data Collections - Send Message to Topic {0}",topic);
+                log.LogInformation("Data Collections - Send Message to Topic {0}", topic);
                 await _messageHelper.SendMessageToTopicAsync(topic, log, message);
                 return;
             }
@@ -80,7 +79,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             }
             else
                 log.LogError("Failed to get subscriptions");
-        }        
+        }
 
     }
 }

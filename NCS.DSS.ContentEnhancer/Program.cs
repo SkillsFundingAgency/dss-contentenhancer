@@ -8,7 +8,7 @@ using NCS.DSS.ContentEnhancer.Service;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices( services =>
+    .ConfigureServices(services =>
     {
         services.AddSingleton<ISubscriptionHelper, SubscriptionHelper>();
         services.AddSingleton<IQueueProcessorService, QueueProcessorService>();
