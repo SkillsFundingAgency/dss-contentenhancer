@@ -1,32 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Cosmos.Helper;
 using NCS.DSS.ContentEnhancer.Models;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Options;
-using System.Linq;
-using Azure.Messaging.ServiceBus;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
     public class QueueProcessorService : IQueueProcessorService
     {
-        readonly string _connectionString = Environment.GetEnvironmentVariable("ServiceBusConnectionString");
         private readonly ISubscriptionHelper _subscriptionHelper;
-        readonly string _digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
-        private readonly string[] _activeTouchPoints = Environment.GetEnvironmentVariable("ActiveTouchPoints")
-            ?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        private readonly string _digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
+        private readonly IMessageHelper _messageHelper;
 
-        private readonly ServiceBusClient _client;
-
-        public QueueProcessorService(ISubscriptionHelper subscriptionHelper)
+        public QueueProcessorService(ISubscriptionHelper subscriptionHelper, IMessageHelper messageHelper)
         {
             _subscriptionHelper = subscriptionHelper;
-            _client = new ServiceBusClient(_connectionString);
+            _messageHelper = messageHelper;
         }
 
         public async Task SendToTopicAsync(MessageModel message, ILogger log)
@@ -40,8 +30,9 @@ namespace NCS.DSS.ContentEnhancer.Service
             //Bypass subscriptions logic for DataCollections Messages
             if (message.DataCollections.HasValue && message.DataCollections == true)
             {
-                log.LogInformation("Send Message Async to Topic");
-                await SendMessageToTopicAsync(GetTopic(message.TouchpointId, log), log, message);
+                var topic = _messageHelper.GetTopic(message.TouchpointId, log);
+                log.LogInformation("Data Collections - Send Message to Topic {0}", topic);
+                await _messageHelper.SendMessageToTopicAsync(topic, log, message);
                 return;
             }
 
@@ -62,7 +53,7 @@ namespace NCS.DSS.ContentEnhancer.Service
             // If source of data came from DigitalIdentity service then send message to digitalidentities topic
             if (message.IsDigitalAccount.GetValueOrDefault())
             {
-                await SendMessageToTopicAsync(_digitalIdentitiesTopic, log, message);
+                await _messageHelper.SendMessageToTopicAsync(_digitalIdentitiesTopic, log, message);
             }
 
 
@@ -75,47 +66,20 @@ namespace NCS.DSS.ContentEnhancer.Service
 
                     foreach (var subscription in subscriptions)
                     {
-                        var topic = GetTopic(subscription.TouchPointId, log);
+                        var topic = _messageHelper.GetTopic(subscription.TouchPointId, log);
 
                         if (string.IsNullOrWhiteSpace(topic))
                             continue;
 
-                        log.LogInformation(string.Format("Send Message to Topic {0}", topic));
+                        log.LogInformation("Subscriptions - Send Message to Topic {0}", topic);
 
-                        await SendMessageToTopicAsync(topic, log, message);
+                        await _messageHelper.SendMessageToTopicAsync(topic, log, message);
                     }
                 }
             }
+            else
+                log.LogError("Failed to get subscriptions");
         }
 
-        private async Task SendMessageToTopicAsync(string topic, ILogger log, MessageModel messageModel)
-        {
-            await using var sender = _client.CreateSender(topic);
-            var message = new ServiceBusMessage(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(messageModel)));
-            message.ApplicationProperties.Add("RetryCount", 0);
-            message.ApplicationProperties.Add("RetryHttpStatusCode", "");
-
-            try
-            {
-                log.LogInformation("sending message to topic {0}", topic);
-                await sender.SendMessageAsync(message);
-            }
-            catch (Exception e)
-            {
-                log.LogError("Send Message To Topic Error: " + e.StackTrace);
-                throw;
-            }
-        }
-
-        private  string GetTopic(string touchPointId, ILogger log)
-        {
-            if (_activeTouchPoints != null && _activeTouchPoints.Contains(touchPointId))
-            {         
-                return touchPointId;
-            }
-
-            log.LogWarning("Touchpoint {0} invalid, returning empty string", touchPointId);
-            return String.Empty;
-        }
     }
 }

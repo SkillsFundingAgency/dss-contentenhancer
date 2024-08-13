@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Models;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
