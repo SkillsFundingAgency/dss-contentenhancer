@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
 {

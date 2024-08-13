@@ -2,8 +2,6 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Models;
 using NCS.DSS.ContentEnhancer.Service;
-using System;
-using System.Threading.Tasks;
 namespace NCS.DSS.ContentEnhancer.Processor
 {
     public class QueueProcessor : IQueueProcessor

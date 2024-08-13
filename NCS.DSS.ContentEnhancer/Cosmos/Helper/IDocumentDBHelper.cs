@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
+﻿namespace NCS.DSS.ContentEnhancer.Cosmos.Helper
 {
     public interface IDocumentDBHelper
     {
