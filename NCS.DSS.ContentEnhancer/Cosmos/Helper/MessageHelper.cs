@@ -1,11 +1,11 @@
-﻿using System;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Models;
 using Newtonsoft.Json;
-using Azure.Messaging.ServiceBus;
+using System;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
@@ -16,12 +16,12 @@ namespace NCS.DSS.ContentEnhancer.Service
         private string[] _activeTouchPoints = [];
 
         public MessageHelper()
-        {           
+        {
             _client = new ServiceBusClient(Environment.GetEnvironmentVariable("ServiceBusConnectionString"));
             _activeTouchPoints = Environment.GetEnvironmentVariable("ActiveTouchPoints")
             ?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         }
-        
+
         public async Task SendMessageToTopicAsync(string topic, ILogger log, MessageModel messageModel)
         {
             await using var sender = _client.CreateSender(topic);

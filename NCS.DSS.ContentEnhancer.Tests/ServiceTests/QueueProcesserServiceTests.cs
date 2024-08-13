@@ -1,9 +1,9 @@
-using NCS.DSS.ContentEnhancer.Cosmos.Helper;
-using Moq;
-using NCS.DSS.ContentEnhancer.Service;
-using NCS.DSS.ContentEnhancer.Models;
 using Microsoft.Extensions.Logging;
+using Moq;
+using NCS.DSS.ContentEnhancer.Cosmos.Helper;
+using NCS.DSS.ContentEnhancer.Models;
 using NCS.DSS.ContentEnhancer.Processor;
+using NCS.DSS.ContentEnhancer.Service;
 namespace NCS.DSS.ContentEnhancer.Tests.ServiceTests
 {
     public class QueueProcesserServiceTests
@@ -22,7 +22,7 @@ namespace NCS.DSS.ContentEnhancer.Tests.ServiceTests
             _subscriptionHelper = new Mock<ISubscriptionHelper>();
             _messageHelper = new Mock<IMessageHelper>();
             _logger = new Mock<ILogger<QueueProcessor>>();
-            _queueProcessorService = new QueueProcessorService(_subscriptionHelper.Object,_messageHelper.Object);
+            _queueProcessorService = new QueueProcessorService(_subscriptionHelper.Object, _messageHelper.Object);
             _subscriptions = [new Subscriptions() { TouchPointId = touchPointId, CustomerId = Guid.Parse(customerId), SubscriptionId = Guid.NewGuid() }];
             _messageModel = new MessageModel()
             {
@@ -45,7 +45,7 @@ namespace NCS.DSS.ContentEnhancer.Tests.ServiceTests
                 await _queueProcessorService.SendToTopicAsync(_messageModel, _logger.Object);
 
                 //ASSERT
-                
+
                 _logger.Verify(x => x.Log(
                        LogLevel.Information,
                        It.IsAny<EventId>(),
@@ -61,7 +61,7 @@ namespace NCS.DSS.ContentEnhancer.Tests.ServiceTests
                 // ASSERT
                 Assert.That(false);
             }
-            
+
         }
         [Test]
         public async Task QueueProcesserService_DataCollections_SendToTopicSuccessfullyAsync()
@@ -105,7 +105,7 @@ namespace NCS.DSS.ContentEnhancer.Tests.ServiceTests
                 //ASSERT
 
                 _logger.Verify(x => x.Log(
-                       LogLevel.Error, 
+                       LogLevel.Error,
                        It.IsAny<EventId>(),
                        It.Is<It.IsAnyType>((object v, Type _) =>
                        v.ToString().Contains("Failed to get subscriptions")),

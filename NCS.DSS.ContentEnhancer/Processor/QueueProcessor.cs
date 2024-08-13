@@ -1,8 +1,8 @@
-using System;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Models;
 using NCS.DSS.ContentEnhancer.Service;
-using Microsoft.Azure.Functions.Worker;
+using System;
 using System.Threading.Tasks;
 namespace NCS.DSS.ContentEnhancer.Processor
 {
@@ -18,7 +18,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
         }
 
         [Function("QueueProcessor")]
-        public async Task RunAsync([ServiceBusTrigger("dss.contentqueue", Connection = "ServiceBusConnectionString")]MessageModel message)
+        public async Task RunAsync([ServiceBusTrigger("dss.contentqueue", Connection = "ServiceBusConnectionString")] MessageModel message)
         {
             if (message == null)
             {

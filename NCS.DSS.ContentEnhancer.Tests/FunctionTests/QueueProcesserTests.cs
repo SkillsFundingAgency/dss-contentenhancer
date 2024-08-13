@@ -26,7 +26,7 @@ namespace NCS.DSS.ContentEnhancer.Tests.FunctionTests
             _subscriptionHelper = new Mock<ISubscriptionHelper>();
             _messageHelper = new Mock<IMessageHelper>();
             _logger = new Mock<ILogger<QueueProcessor>>();
-            _queueProcessorService = new QueueProcessorService(_subscriptionHelper.Object, _messageHelper.Object); 
+            _queueProcessorService = new QueueProcessorService(_subscriptionHelper.Object, _messageHelper.Object);
             _queueProcessor = new QueueProcessor(_queueProcessorService, _logger.Object);
             _subscriptions = [new Subscriptions() { TouchPointId = touchPointId, CustomerId = Guid.Parse(customerId), SubscriptionId = Guid.NewGuid() }];
             _messageModel = new MessageModel()
@@ -49,7 +49,7 @@ namespace NCS.DSS.ContentEnhancer.Tests.FunctionTests
                 _queueProcessor.RunAsync(_messageModel);
 
                 //ASSERT
-                
+
                 _logger.Verify(x => x.Log(
                        LogLevel.Information, //Change LogLevel as required
                        It.IsAny<EventId>(),
