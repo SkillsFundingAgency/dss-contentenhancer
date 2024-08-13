@@ -2,10 +2,7 @@
 using Microsoft.Extensions.Logging;
 using NCS.DSS.ContentEnhancer.Models;
 using Newtonsoft.Json;
-using System;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NCS.DSS.ContentEnhancer.Service
 {
