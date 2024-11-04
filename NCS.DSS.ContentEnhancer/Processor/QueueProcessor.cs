@@ -18,6 +18,8 @@ namespace NCS.DSS.ContentEnhancer.Processor
         [Function("QueueProcessor")]
         public async Task RunAsync([ServiceBusTrigger("dss.contentqueue", Connection = "ServiceBusConnectionString")] MessageModel message)
         {
+            _logger.LogInformation($"Function {nameof(QueueProcessor)} has been invoked");
+
             if (message == null)
             {
                 _logger.LogError("Brokered Message cannot be null");
@@ -35,6 +37,8 @@ namespace NCS.DSS.ContentEnhancer.Processor
                 _logger.LogError(ex.StackTrace);
                 throw;
             }
+
+            _logger.LogInformation($"Function {nameof(QueueProcessor)} has finished invoking");
         }
     }
 }
