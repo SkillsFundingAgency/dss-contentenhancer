@@ -64,13 +64,13 @@ namespace NCS.DSS.ContentEnhancer.Processor
                 await _messagingService.SendMessageToTopicAsync(digitalIdentitiesTopic, _logger, message);
             }
 
-            if (subscriptions == null || subscriptions.Count == 0) // should it be possible for someone to not have an active subscription?
+            if (subscriptions == null || subscriptions.Count == 0)
             {
-                _logger.LogError($"Failed to retrieve SUBSCRIPTIONS for Customer. Customer GUID: {message.CustomerGuid}. Touchpoint ID: {message.TouchpointId}");
+                _logger.LogWarning($"Customer with GUID {message.CustomerGuid} does not have subscriptions associated with other touchpoint IDs. Originating touchpoint ID: {message.TouchpointId}");
             }
             else 
             {
-                _logger.LogInformation($"Subscription count: {subscriptions.Count}");
+                _logger.LogInformation("Change notification related messages have been received - subscribers will now be notified");
 
                 foreach (var subscription in subscriptions)
                 {
@@ -81,8 +81,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
                         _logger.LogWarning($"Invalid or unsupported subscription touchpoint ID: {subscription.TouchPointId}");
                         continue;
                     }
-
-                    _logger.LogInformation("Subscription notification related message has been received");
+                    
                     await _messagingService.SendMessageToTopicAsync(topic, _logger, message);
                 }
             }
