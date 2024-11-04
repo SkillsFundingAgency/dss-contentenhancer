@@ -14,7 +14,7 @@ var host = new HostBuilder()
         services.AddSingleton<IDocumentDBHelper, DocumentDBHelper>();
         services.AddSingleton<IDocumentDBProvider, DocumentDBProvider>();
         services.AddSingleton<IDocumentDBClient, DocumentDBClient>();
-        
+
         // shared services
         services.AddSingleton<IMessagingService, MessagingService>();
         services.AddSingleton<ISubscriptionService, SubscriptionService>();

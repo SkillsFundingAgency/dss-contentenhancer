@@ -68,7 +68,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
             {
                 _logger.LogWarning($"Customer with GUID {message.CustomerGuid} does not have subscriptions associated with other touchpoint IDs. Originating touchpoint ID: {message.TouchpointId}");
             }
-            else 
+            else
             {
                 _logger.LogInformation("Change notification related messages have been received - subscribers will now be notified");
 
@@ -81,7 +81,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
                         _logger.LogWarning($"Invalid or unsupported subscription touchpoint ID: {subscription.TouchPointId}");
                         continue;
                     }
-                    
+
                     await _messagingService.SendMessageToTopicAsync(topic, _logger, message);
                 }
             }

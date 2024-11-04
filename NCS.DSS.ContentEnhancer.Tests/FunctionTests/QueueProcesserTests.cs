@@ -3,7 +3,6 @@ using Moq;
 using NCS.DSS.ContentEnhancer.Models;
 using NCS.DSS.ContentEnhancer.Processor;
 using NCS.DSS.ContentEnhancer.Services;
-using NUnit.Framework.Internal;
 
 namespace NCS.DSS.ContentEnhancer.Tests.FunctionTests
 {
