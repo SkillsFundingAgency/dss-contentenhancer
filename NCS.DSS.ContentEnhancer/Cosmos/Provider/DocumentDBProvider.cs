@@ -20,7 +20,6 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
         public async Task<List<Models.Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string senderTouchPointId)
         {
             var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
-
             var client = _databaseClient.CreateDocumentClient();
 
             var query = client

@@ -8,15 +8,10 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Client
 
         public DocumentClient CreateDocumentClient()
         {
-            if (_documentClient != null)
-                return _documentClient;
+            string serviceEndpoint = Environment.GetEnvironmentVariable("Endpoint");
+            string authorisationKey = Environment.GetEnvironmentVariable("Key");
 
-            _documentClient = new DocumentClient(new Uri(
-                Environment.GetEnvironmentVariable("Endpoint")),
-            Environment.GetEnvironmentVariable("Key"));
-
-            return _documentClient;
+            return _documentClient != null ? _documentClient : new DocumentClient(new Uri(serviceEndpoint), authorisationKey);
         }
-
     }
 }
