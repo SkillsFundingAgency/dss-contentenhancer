@@ -1,11 +1,11 @@
-﻿using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
+﻿using Microsoft.Azure.Cosmos;
+using NCS.DSS.ContentEnhancer.Models;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 {
     public interface IDocumentDBProvider
     {
-        Task<List<Models.Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string SenderTouchpointId);
-        Task<ResourceResponse<Document>> CreateSubscriptionsAsync(Models.Subscriptions subscriptions);
+        Task<List<Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string senderTouchpointId);
+        Task<ItemResponse<Subscriptions>> CreateSubscriptionsAsync(Subscriptions subscriptions);
     }
 }

@@ -1,60 +1,45 @@
-﻿using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents.Linq;
-using NCS.DSS.ContentEnhancer.Cosmos.Client;
-using NCS.DSS.ContentEnhancer.Cosmos.Helper;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using NCS.DSS.ContentEnhancer.Models;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 {
     public class DocumentDBProvider : IDocumentDBProvider
     {
-        private readonly IDocumentDBHelper _documentDbHelper;
-        private readonly IDocumentDBClient _databaseClient;
+        private readonly Container _container;
+        private readonly string _databaseId = Environment.GetEnvironmentVariable("DatabaseId");
+        private readonly string _containerId = Environment.GetEnvironmentVariable("CollectionId");
 
-        public DocumentDBProvider(IDocumentDBHelper documentDbHelper, IDocumentDBClient documentDbClient)
+        public DocumentDBProvider(CosmosClient cosmosClient)
         {
-            _documentDbHelper = documentDbHelper;
-            _databaseClient = documentDbClient;
+            _container = cosmosClient.GetContainer(_databaseId, _containerId);
         }
 
         public async Task<List<Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string senderTouchPointId)
         {
-            var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
-            var client = _databaseClient.CreateDocumentClient();
-
-            var query = client?.CreateDocumentQuery<Subscriptions>(collectionUri).Where(
-                x => x.CustomerId == customerId && x.TouchPointId != senderTouchPointId && x.Subscribe).AsDocumentQuery();
-
-            if (query == null)
+            if (customerId == null)
             {
                 return null;
             }
+
+            var query = _container.GetItemLinqQueryable<Subscriptions>(true)
+                .Where(x => x.CustomerId == customerId && x.TouchPointId != senderTouchPointId && x.Subscribe)
+                .ToFeedIterator();
 
             List<Subscriptions> subscriptions = new List<Subscriptions>();
 
             while (query.HasMoreResults)
             {
-                var results = await query.ExecuteNextAsync<Subscriptions>();
+                var results = await query.ReadNextAsync();
                 subscriptions.AddRange(results);
             }
 
             return subscriptions.Any() ? subscriptions : null;
         }
 
-        public async Task<ResourceResponse<Document>> CreateSubscriptionsAsync(Subscriptions subscriptions)
+        public async Task<ItemResponse<Subscriptions>> CreateSubscriptionsAsync(Subscriptions subscriptions)
         {
-            var collectionUri = _documentDbHelper.CreateDocumentCollectionUri();
-
-            var client = _databaseClient.CreateDocumentClient();
-
-            if (client == null)
-            {
-                return null;
-            }
-
-            var response = await client.CreateDocumentAsync(collectionUri, subscriptions);
-            return response;
+            return await _container.CreateItemAsync(subscriptions, new PartitionKey(subscriptions.CustomerId.ToString()));
         }
     }
 }
