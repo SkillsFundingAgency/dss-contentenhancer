@@ -60,6 +60,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
             bool messageIncludesDigitalIdentity = message.IsDigitalAccount.GetValueOrDefault();
             if (messageIncludesDigitalIdentity)
             {
+                _logger.LogInformation("Digital Identity related message has been received");
                 string digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
                 await _messagingService.SendMessageToTopicAsync(digitalIdentitiesTopic, _logger, message);
             }
