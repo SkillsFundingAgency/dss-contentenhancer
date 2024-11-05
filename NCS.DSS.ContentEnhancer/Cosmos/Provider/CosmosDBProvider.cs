@@ -22,7 +22,7 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
                 return null;
             }
 
-            var query = _container.GetItemLinqQueryable<Subscriptions>(true)
+            var query = _container.GetItemLinqQueryable<Subscriptions>()
                 .Where(x => x.CustomerId == customerId && x.TouchPointId != senderTouchPointId && x.Subscribe)
                 .ToFeedIterator();
 
