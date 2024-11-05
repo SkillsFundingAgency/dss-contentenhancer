@@ -6,9 +6,9 @@ namespace NCS.DSS.ContentEnhancer.Services
 {
     public class SubscriptionService : ISubscriptionService
     {
-        private readonly IDocumentDBProvider _dbProvider;
+        private readonly ICosmosDBProvider _dbProvider;
 
-        public SubscriptionService(IDocumentDBProvider dbProvider)
+        public SubscriptionService(ICosmosDBProvider dbProvider)
         {
             _dbProvider = dbProvider;
         }

@@ -21,7 +21,7 @@ namespace NCS.DSS.ContentEnhancer
                     services.ConfigureFunctionsApplicationInsights();
 
                     services.AddSingleton<IQueueProcessor, QueueProcessor>();
-                    services.AddSingleton<IDocumentDBProvider, DocumentDBProvider>();
+                    services.AddSingleton<ICosmosDBProvider, CosmosDBProvider>();
 
                     services.AddSingleton(s =>
                     {

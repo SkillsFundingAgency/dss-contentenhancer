@@ -4,13 +4,13 @@ using NCS.DSS.ContentEnhancer.Models;
 
 namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 {
-    public class DocumentDBProvider : IDocumentDBProvider
+    public class CosmosDBProvider : ICosmosDBProvider
     {
         private readonly Container _container;
         private readonly string _databaseId = Environment.GetEnvironmentVariable("DatabaseId");
         private readonly string _containerId = Environment.GetEnvironmentVariable("CollectionId");
 
-        public DocumentDBProvider(CosmosClient cosmosClient)
+        public CosmosDBProvider(CosmosClient cosmosClient)
         {
             _container = cosmosClient.GetContainer(_databaseId, _containerId);
         }
@@ -36,7 +36,6 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 
             return subscriptions.Any() ? subscriptions : null;
         }
-
         public async Task<ItemResponse<Subscriptions>> CreateSubscriptionsAsync(Subscriptions subscriptions)
         {
             return await _container.CreateItemAsync(subscriptions, new PartitionKey(subscriptions.CustomerId.ToString()));
