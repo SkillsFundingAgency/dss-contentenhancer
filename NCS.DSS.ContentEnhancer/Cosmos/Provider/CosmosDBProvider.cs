@@ -17,7 +17,7 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 
         public async Task<List<Subscriptions>> GetSubscriptionsByCustomerIdAsync(Guid? customerId, string senderTouchPointId)
         {
-            if (customerId == null)
+            if (customerId == null || String.IsNullOrEmpty(senderTouchPointId))
             {
                 return null;
             }
