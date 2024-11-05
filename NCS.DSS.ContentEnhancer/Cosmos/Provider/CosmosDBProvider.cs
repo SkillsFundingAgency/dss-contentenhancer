@@ -36,9 +36,5 @@ namespace NCS.DSS.ContentEnhancer.Cosmos.Provider
 
             return subscriptions.Any() ? subscriptions : null;
         }
-        public async Task<ItemResponse<Subscriptions>> CreateSubscriptionsAsync(Subscriptions subscriptions)
-        {
-            return await _container.CreateItemAsync(subscriptions, new PartitionKey(subscriptions.CustomerId.ToString()));
-        }
     }
 }
