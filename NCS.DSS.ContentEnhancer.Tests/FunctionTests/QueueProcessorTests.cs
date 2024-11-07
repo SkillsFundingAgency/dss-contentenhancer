@@ -112,7 +112,7 @@ namespace NCS.DSS.ContentEnhancer.Tests.FunctionTests
             {
                 await _queueProcessor.RunAsync(_messageModel);
             }
-            catch (Exception ex)
+            catch
             {
                 // Assert
                 _loggerMock.Verify(x => x.Log(
