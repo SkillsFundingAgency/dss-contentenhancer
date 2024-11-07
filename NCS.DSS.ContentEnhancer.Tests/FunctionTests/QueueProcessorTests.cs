@@ -191,5 +191,37 @@ namespace NCS.DSS.ContentEnhancer.Tests.FunctionTests
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ), Times.Once);
         }
+
+        [Test]
+        public async Task CustomerWithAdditionalSubscriptionButInvalidTouchpoint_LogsExpectedWarning()
+        {
+            _messageModel.TouchpointId = TouchpointIdInvalid;
+
+            // Arrange
+            _messagingServiceMock.Setup(x => x.GetTopic(TouchpointIdInvalid, _loggerMock.Object)).Returns(string.Empty);
+            _subscriptionServiceMock.Setup(x => x.GetSubscriptionsAsync(It.IsAny<MessageModel>(), _loggerMock.Object)).ReturnsAsync(new List<Subscriptions>(){
+                new Subscriptions(){ CustomerId = Guid.Parse(CustomerId), Subscribe = true, SubscriptionId = new Guid(), TouchPointId = TouchpointIdInvalid, LastModifiedBy = TouchpointIdInvalid, LastModifiedDate = DateTime.Now }
+            });
+
+            // Act
+            await _queueProcessor.RunAsync(_messageModel);
+
+            // Assert
+            _loggerMock.Verify(x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((@object, @type) => @object.ToString() == "Change notification related messages have been received - subscribers will now be notified"),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+            ), Times.Once);
+
+            _loggerMock.Verify(x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((@object, @type) => @object.ToString() == "Invalid or unsupported subscription touchpoint ID: 0000000000"),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+            ), Times.AtLeastOnce);
+        }
     }
 }

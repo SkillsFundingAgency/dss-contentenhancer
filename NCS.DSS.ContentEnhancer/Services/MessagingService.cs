@@ -47,6 +47,5 @@ namespace NCS.DSS.ContentEnhancer.Services
             log.LogWarning($"The received touchpoint ID ({touchPointId}) is invalid. Returning an empty string");
             return String.Empty;
         }
-
     }
 }
