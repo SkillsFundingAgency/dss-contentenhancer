@@ -4,19 +4,17 @@ using NCS.DSS.ContentEnhancer.Models;
 using Newtonsoft.Json;
 using System.Text;
 
-namespace NCS.DSS.ContentEnhancer.Service
+namespace NCS.DSS.ContentEnhancer.Services
 {
-    public class MessageHelper : IMessageHelper
+    public class MessagingService : IMessagingService
     {
-
         private ServiceBusClient _client;
         private string[] _activeTouchPoints = [];
 
-        public MessageHelper()
+        public MessagingService()
         {
             _client = new ServiceBusClient(Environment.GetEnvironmentVariable("ServiceBusConnectionString"));
-            _activeTouchPoints = Environment.GetEnvironmentVariable("ActiveTouchPoints")
-            ?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            _activeTouchPoints = Environment.GetEnvironmentVariable("ActiveTouchPoints")?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         }
 
         public async Task SendMessageToTopicAsync(string topic, ILogger log, MessageModel messageModel)
@@ -28,13 +26,13 @@ namespace NCS.DSS.ContentEnhancer.Service
 
             try
             {
-                log.LogInformation("sending message to topic {0}", topic);
+                log.LogInformation($"Attempting to send message to topic: {topic}");
                 await sender.SendMessageAsync(message);
-                log.LogInformation("Message Sent Successfully");
+                log.LogInformation($"Successfully sent message to topic: {topic}");
             }
             catch (Exception e)
             {
-                log.LogError("Send Message To Topic Error: " + e.StackTrace);
+                log.LogError($"Failed to send message to topic. Error: {e.StackTrace}");
                 throw;
             }
         }
@@ -46,9 +44,8 @@ namespace NCS.DSS.ContentEnhancer.Service
                 return touchPointId;
             }
 
-            log.LogWarning("Touchpoint {0} invalid, returning empty string", touchPointId);
+            log.LogWarning($"The received touchpoint ID ({touchPointId}) is invalid. Returning an empty string");
             return String.Empty;
         }
-
     }
 }
