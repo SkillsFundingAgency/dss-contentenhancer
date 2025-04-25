@@ -124,31 +124,7 @@ namespace NCS.DSS.ContentEnhancer.Tests.FunctionTests
                 ), Times.Once);
             }
         }
-
-        [Test]
-        public async Task CustomerWithDigitalIdentity_LogsExpectedInformation()
-        {
-            _messageModel.IsDigitalAccount = true;
-
-            // Arrange
-            _messagingServiceMock.Setup(x => x.GetTopic(TouchpointId9003, _loggerMock.Object)).Returns(TouchpointId9003);
-            _subscriptionServiceMock.Setup(x => x.GetSubscriptionsAsync(It.IsAny<MessageModel>(), _loggerMock.Object)).ReturnsAsync(new List<Subscriptions>{
-                new Subscriptions() { CustomerId = Guid.Parse(CustomerId), Subscribe = true, SubscriptionId = new Guid(), TouchPointId = TouchpointId9001, LastModifiedBy = TouchpointId9001, LastModifiedDate = DateTime.Now }
-            });
-
-            // Act
-            await _queueProcessor.RunAsync(_messageModel);
-
-            // Assert
-            _loggerMock.Verify(x => x.Log(
-                LogLevel.Information,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((@object, @type) => @object.ToString() == "Digital Identity related message has been received"),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-            ), Times.Once);
-        }
-
+       
         [Test]
         public async Task CustomerWithASingleSubscription_LogsExpectedWarning()
         {

@@ -56,15 +56,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
                 _logger.LogError($"Failed to retrieve SUBSCRIPTIONS for Customer. Error: {ex.StackTrace}");
                 throw;
             }
-
-            bool messageIncludesDigitalIdentity = message.IsDigitalAccount.GetValueOrDefault();
-            if (messageIncludesDigitalIdentity)
-            {
-                _logger.LogInformation("Digital Identity related message has been received");
-                string digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
-                await _messagingService.SendMessageToTopicAsync(digitalIdentitiesTopic, _logger, message);
-            }
-
+           
             if (subscriptions == null || subscriptions.Count == 0)
             {
                 _logger.LogWarning($"Customer with GUID {message.CustomerGuid} does not have subscriptions associated with other touchpoint IDs. Originating touchpoint ID: {message.TouchpointId}");
