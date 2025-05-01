@@ -16,8 +16,7 @@ namespace NCS.DSS.ContentEnhancer.Service
     public class QueueProcessorService : IQueueProcessorService
     {
         readonly string _connectionString = Environment.GetEnvironmentVariable("ServiceBusConnectionString");
-        private readonly ISubscriptionHelper _subscriptionHelper;
-        readonly string _digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
+        private readonly ISubscriptionHelper _subscriptionHelper;       
         private readonly string[] _activeTouchPoints = Environment.GetEnvironmentVariable("ActiveTouchPoints")
             ?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -58,13 +57,6 @@ namespace NCS.DSS.ContentEnhancer.Service
                 log.LogError("Get Subscriptions Error: " + ex.StackTrace);
                 throw;
             }
-
-            // If source of data came from DigitalIdentity service then send message to digitalidentities topic
-            if (message.IsDigitalAccount.GetValueOrDefault())
-            {
-                await SendMessageToTopicAsync(_digitalIdentitiesTopic, log, message);
-            }
-
 
             //For each subscription - send notification
             if (subscriptions != null)
