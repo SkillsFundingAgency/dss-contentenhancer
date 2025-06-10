@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NCS.DSS.ContentEnhancer.Models
+﻿namespace NCS.DSS.ContentEnhancer.Models
 {
     public class Subscriptions
     {
