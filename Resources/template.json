@@ -47,7 +47,6 @@
         "Endpoint": "[parameters('cosmosDbEndpoint')]",
         "Key": "[parameters('cosmosDbKey')]",
         "ServiceBusConnectionString": "[parameters('serviceBusConnectionString')]",
-        "DigitalIdentitiesTopic": "digitalidentity",
         "ActiveTouchPoints": "[parameters('activeTouchPoints')]"
       },
       "copy": {
