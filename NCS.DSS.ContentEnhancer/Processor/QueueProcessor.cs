@@ -20,7 +20,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
         [Function("QueueProcessor")]
         public async Task RunAsync([ServiceBusTrigger("dss.contentqueue", Connection = "ServiceBusConnectionString")] MessageModel message)
         {
-            _logger.LogInformation($"Function {nameof(QueueProcessor)} has been invoked");
+            _logger.LogTrace($"Function {nameof(QueueProcessor)} has been invoked");
 
             if (message == null)
             {
@@ -39,7 +39,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
                     throw new ArgumentException($"Invalid or unsupported touchpoint ID: {message.TouchpointId}");
                 }
 
-                _logger.LogInformation("Data Collections related message has been received");
+                _logger.LogTrace("Data Collections related message has been received");
                 await _messagingService.SendMessageToTopicAsync(topic, _logger, message);
                 return;
             }
@@ -60,18 +60,18 @@ namespace NCS.DSS.ContentEnhancer.Processor
             bool messageIncludesDigitalIdentity = message.IsDigitalAccount.GetValueOrDefault();
             if (messageIncludesDigitalIdentity)
             {
-                _logger.LogInformation("Digital Identity related message has been received");
+                _logger.LogTrace("Digital Identity related message has been received");
                 string digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
                 await _messagingService.SendMessageToTopicAsync(digitalIdentitiesTopic, _logger, message);
             }
 
             if (subscriptions == null || subscriptions.Count == 0)
             {
-                _logger.LogWarning($"Customer with GUID {message.CustomerGuid} does not have subscriptions associated with other touchpoint IDs. Originating touchpoint ID: {message.TouchpointId}");
+                _logger.LogInformation($"Customer with GUID {message.CustomerGuid} does not have subscriptions associated with other touchpoint IDs. Originating touchpoint ID: {message.TouchpointId}");
             }
             else
             {
-                _logger.LogInformation("Change notification related messages have been received - subscribers will now be notified");
+                _logger.LogTrace("Change notification related messages have been received - subscribers will now be notified");
 
                 foreach (var subscription in subscriptions)
                 {
@@ -87,7 +87,7 @@ namespace NCS.DSS.ContentEnhancer.Processor
                 }
             }
 
-            _logger.LogInformation($"Function {nameof(QueueProcessor)} has finished invoking");
+            _logger.LogTrace($"Function {nameof(QueueProcessor)} has finished invoking");
         }
     }
 }

@@ -18,12 +18,12 @@ namespace NCS.DSS.ContentEnhancer.Services
             var customerGuid = messageModel.CustomerGuid;
             var senderTouchPointId = messageModel.TouchpointId;
 
-            logger.LogInformation($"Attempting to retrieve SUBSCRIPTIONS, which have a different touchpoint ID to {senderTouchPointId}, for Customer with GUID: {customerGuid}");
+            logger.LogTrace($"Attempting to retrieve SUBSCRIPTIONS, which have a different touchpoint ID to {senderTouchPointId}, for Customer with GUID: {customerGuid}");
             List<Subscriptions> subscriptions = await _dbProvider.GetSubscriptionsByCustomerIdAsync(customerGuid, senderTouchPointId);
 
-            if (subscriptions != null)
+            if (subscriptions == null)
             {
-                logger.LogInformation($"Successfully retrieved {subscriptions.Count} subscriptions from Cosmos DB");
+                logger.LogInformation($"No subscriptions found, which have a different touchpoint ID to {senderTouchPointId}, for Customer with GUID: {customerGuid}");
             }
 
             return subscriptions;
