@@ -21,9 +21,9 @@ namespace NCS.DSS.ContentEnhancer.Services
             logger.LogTrace($"Attempting to retrieve SUBSCRIPTIONS, which have a different touchpoint ID to {senderTouchPointId}, for Customer with GUID: {customerGuid}");
             List<Subscriptions> subscriptions = await _dbProvider.GetSubscriptionsByCustomerIdAsync(customerGuid, senderTouchPointId);
 
-            if (subscriptions == null)
+            if (subscriptions != null)
             {
-                logger.LogInformation($"No subscriptions found, which have a different touchpoint ID to {senderTouchPointId}, for Customer with GUID: {customerGuid}");
+                logger.LogTrace($"Successfully retrieved {subscriptions.Count} subscriptions from Cosmos DB");
             }
 
             return subscriptions;
