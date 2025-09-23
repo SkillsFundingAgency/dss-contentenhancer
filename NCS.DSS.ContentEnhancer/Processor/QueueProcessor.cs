@@ -57,14 +57,6 @@ namespace NCS.DSS.ContentEnhancer.Processor
                 throw;
             }
 
-            bool messageIncludesDigitalIdentity = message.IsDigitalAccount.GetValueOrDefault();
-            if (messageIncludesDigitalIdentity)
-            {
-                _logger.LogTrace("Digital Identity related message has been received");
-                string digitalIdentitiesTopic = Environment.GetEnvironmentVariable("DigitalIdentitiesTopic");
-                await _messagingService.SendMessageToTopicAsync(digitalIdentitiesTopic, _logger, message);
-            }
-
             if (subscriptions == null || subscriptions.Count == 0)
             {
                 _logger.LogInformation($"Customer with GUID {message.CustomerGuid} does not have subscriptions associated with other touchpoint IDs. Originating touchpoint ID: {message.TouchpointId}");
