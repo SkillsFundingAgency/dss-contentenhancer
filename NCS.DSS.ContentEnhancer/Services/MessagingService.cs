@@ -26,9 +26,9 @@ namespace NCS.DSS.ContentEnhancer.Services
 
             try
             {
-                log.LogInformation($"Attempting to send message to topic: {topic}");
+                log.LogTrace($"Attempting to send message to topic: {topic}");
                 await sender.SendMessageAsync(message);
-                log.LogInformation($"Successfully sent message to topic: {topic}");
+                log.LogTrace($"Successfully sent message to topic: {topic}");
             }
             catch (Exception e)
             {

@@ -14,17 +14,13 @@
     "cosmosDbEndpoint": {
       "type": "string"
     },
-    "cosmosDbKey": {
-      "type": "string"
-    },
-
     "environmentName": {
       "type": "string"
     },
     "functionAppNames": {
       "type": "array"
     },
-    "serviceBusConnectionString": {
+    "keyVaultName": {
       "type": "string"
     },
     "activeTouchPoints": {
@@ -45,8 +41,8 @@
         "CollectionId": "[parameters('cosmosDbCollectionId')]",
         "DatabaseId": "[parameters('cosmosDbDatabaseId')]",
         "Endpoint": "[parameters('cosmosDbEndpoint')]",
-        "Key": "[parameters('cosmosDbKey')]",
-        "ServiceBusConnectionString": "[parameters('serviceBusConnectionString')]",
+        "Key": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=CosmosDbAccessKey)', parameters('keyVaultName'))]",
+        "ServiceBusConnectionString": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=ServiceBusConnectionString)', parameters('keyVaultName'))]",
         "ActiveTouchPoints": "[parameters('activeTouchPoints')]"
       },
       "copy": {
